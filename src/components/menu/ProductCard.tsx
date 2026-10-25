@@ -11,7 +11,7 @@ export function ProductCard({ product, canOrder = true }: { product: Product; ca
   const [imageFailed, setImageFailed] = useState(false);
   const [customizing, setCustomizing] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const availableExtras = product.extras?.filter((extra) => extra.available) ?? [];
+  const availableExtras = useMemo(() => product.extras?.filter((extra) => extra.available) ?? [], [product.extras]);
   const cartQuantity = items.filter((item) => item.product.id === product.id).reduce((sum, item) => sum + item.quantity, 0);
   const selectedExtras = useMemo(() => availableExtras.filter((extra) => selectedIds.includes(extra.id)), [availableExtras, selectedIds]);
 

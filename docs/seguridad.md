@@ -20,7 +20,7 @@ Estas limitaciones **existen hoy** en el código. Están priorizadas en el plan 
 | 2 | **Mitigado (Fase 5):** `create_order` limita los pedidos en proceso por teléfono (3 por defecto) y los pendientes sin atender de todo el negocio (30 por defecto), también cuando se invoca directamente con la clave pública. **Riesgo residual:** un atacante con muchos teléfonos distintos puede llegar al tope global y bloquear temporalmente a clientes reales (la cocina queda protegida, pero hay denegación de servicio parcial). No hay captcha | Medio | Mitigado; captcha opcional en el futuro |
 | 3 | El límite de intentos de `/api/orders/track` vive en la memoria de cada instancia y se basa en `x-forwarded-for`, que puede falsificarse. En despliegues serverless o con varias instancias es poco efectivo | Medio | Documentado; mitigado por el requisito de folio + 4 dígitos |
 | 4 | El folio se genera con `random()` (no criptográfico). No es un secreto fuerte | Bajo | Aceptado; compensado por los 4 dígitos del teléfono |
-| 5 | No hay pruebas automatizadas de RLS ni de `create_order` | Medio | Pendiente (Fase 6) |
+| 5 | ~~Sin pruebas de RLS ni de `create_order`~~ | — | **Resuelto (Fase 6):** suite SQL con roles reales (ver `docs/calidad.md`) |
 | 6 | ~~`schema03.sql` borraba datos~~ | — | **Resuelto (Fase 3):** migraciones versionadas sin `DROP`; el seed está separado |
 
 ## Transferencias

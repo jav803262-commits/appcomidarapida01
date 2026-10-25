@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 
 type OrderStatus =
@@ -175,9 +176,6 @@ export default function AdminPage() {
     [filter, orders]
   );
 
-  const selectedOrder = orders.find((order) => order.id === selectedOrderId) ?? null;
-  const notificationOrder = orders.find((order) => order.id === notificationOrderId) ?? null;
-
   const makeNotificationMessage = (order: OrderRow, type: string) => {
     const folio = `#${order.order_number}`;
     const total = money(order.total);
@@ -230,7 +228,7 @@ export default function AdminPage() {
 
   async function updateStatus(order: OrderRow, status: OrderStatus) {
     setNotice("");
-    const { data, error } = await supabaseBrowser.rpc("transition_order_status", {
+    const { error } = await supabaseBrowser.rpc("transition_order_status", {
       p_order_id: order.id,
       p_new_status: status,
     });
@@ -261,7 +259,7 @@ export default function AdminPage() {
     return (
       <main className="admin-shell admin-login-wrap">
         <section className="admin-login">
-          <a className="admin-back" href="/">← Volver al menú</a>
+          <Link className="admin-back" href="/">← Volver al menú</Link>
           <div className="admin-brand-mark">TB</div>
           <p className="admin-eyebrow">TORITOS BURGER</p>
           <h1>Panel de pedidos</h1>

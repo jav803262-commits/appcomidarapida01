@@ -17,5 +17,7 @@ export function createWhatsAppMessage(order: Order, businessName: string) {
 
 export function createWhatsAppLink(phone: string, order: Order, businessName: string) {
   const message = createWhatsAppMessage(order, businessName);
-  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  // wa.me exige solo dígitos (con lada internacional): se descartan +, espacios y guiones.
+  const digits = phone.replace(/\D/g, "");
+  return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
 }

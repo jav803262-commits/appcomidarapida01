@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "make-admin": "tsx scripts/make-admin.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:sql": "bash supabase/tests/run_tests.sh"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.75.0",
@@ -21,8 +24,11 @@
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
     "dotenv": "^18.0.9",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.4.3",
     "tailwindcss": "4.1.14",
     "tsx": "^4.23.15",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "^5.0.5"
   }
 }

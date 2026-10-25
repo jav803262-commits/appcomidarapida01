@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 type TrackingResult = {
@@ -36,15 +37,17 @@ export default function ConsultOrderPage() {
     if (initialFolio) setFolio(initialFolio.toUpperCase().replace(/[^A-HJ-NP-Z2-9]/g, "").slice(0, 6));
   }, []);
 
+  const trackedOrderNumber = result?.orderNumber;
+
   useEffect(() => {
-    if (!result || !phoneLast4) return;
+    if (!trackedOrderNumber || !phoneLast4) return;
     const timer = window.setInterval(async () => {
       try {
         const response = await fetch("/api/orders/track", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           cache: "no-store",
-          body: JSON.stringify({ folio: result.orderNumber, phoneLast4 }),
+          body: JSON.stringify({ folio: trackedOrderNumber, phoneLast4 }),
         });
         if (response.ok) setResult(await response.json() as TrackingResult);
       } catch {
@@ -52,7 +55,7 @@ export default function ConsultOrderPage() {
       }
     }, 30000);
     return () => window.clearInterval(timer);
-  }, [result?.orderNumber, phoneLast4]);
+  }, [trackedOrderNumber, phoneLast4]);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -80,7 +83,7 @@ export default function ConsultOrderPage() {
 
   return (
     <main className="mx-auto min-h-screen max-w-xl px-4 py-10">
-      <a href="/" className="text-sm font-bold text-zinc-500 hover:text-zinc-900">← Volver al menú</a>
+      <Link href="/" className="text-sm font-bold text-zinc-500 hover:text-zinc-900">← Volver al menú</Link>
       <section className="mt-5 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-zinc-200 sm:p-8">
         <div className="text-4xl" aria-hidden="true">🍔</div>
         <h1 className="mt-3 text-3xl font-black tracking-tight">Consulta tu pedido</h1>

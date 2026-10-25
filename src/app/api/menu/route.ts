@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
-import type { BusinessSettings, CatalogData } from "@/types";
+import type { CatalogData } from "@/types";
 
 const dayKeys: Record<string, string> = {
   Monday: "monday", Tuesday: "tuesday", Wednesday: "wednesday", Thursday: "thursday",

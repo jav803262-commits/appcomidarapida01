@@ -48,16 +48,18 @@ El esquema está en migraciones versionadas (`supabase/migrations/`) y los datos
 ## Comprobaciones
 
 ```bash
-npx tsc --noEmit    # tipos
+npm run typecheck   # tipos
+npm run lint        # ESLint
+npm test            # pruebas unitarias (Vitest)
 npm run build       # compilación (requiere las dos variables de entorno)
+npm run test:sql    # pruebas del esquema SQL (requiere PostgreSQL local; ver docs/calidad.md)
 ```
-
-Aún no hay pruebas automatizadas ni ESLint (previstos en el plan de corrección).
 
 ## Documentación
 
 - [`docs/arquitectura.md`](docs/arquitectura.md) — estructura y flujos.
 - [`docs/base-de-datos.md`](docs/base-de-datos.md) — tablas, funciones y permisos.
 - [`docs/seguridad.md`](docs/seguridad.md) — modelo de seguridad y limitaciones conocidas.
+- [`docs/calidad.md`](docs/calidad.md) — pruebas, lint y deuda técnica conocida.
 - [`docs/fotos-productos.md`](docs/fotos-productos.md) — configuración del bucket de imágenes.
 - [`docs/archivo/`](docs/archivo/LEEME.md) — README antiguos (desactualizados).
