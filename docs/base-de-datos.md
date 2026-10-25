@@ -1,18 +1,39 @@
 # Base de datos (Supabase / PostgreSQL)
 
-## Cómo se crea hoy
+## Cómo se crea
 
-Todo el esquema está en `supabase/schema03.sql`. Es un «esquema canónico» que consolida lo que antes se planeaba como migraciones 001–009.
+El esquema vive en **migraciones versionadas** (`supabase/migrations/`), listas para Supabase CLI. Los datos de demostración están aparte, en `supabase/seed.sql`, y **nunca deben aplicarse en producción**.
 
-> ⚠️ **Es destructivo.** Empieza con `DROP TABLE ... CASCADE` sobre todas las tablas de la aplicación e inserta datos de demostración (categorías, productos y pedidos marcados `[DEMO]`). Úsalo **solo en una base de desarrollo**. No existe todavía una ruta de actualización segura para producción (ver `CHANGELOG.md`, «Pendiente»).
+| Archivo | Contenido |
+|---|---|
+| `migrations/20261024000000_baseline.sql` | Estructura completa (tablas, funciones, RLS, permisos) y una fila mínima de `settings` con pedidos desactivados |
+| `seed.sql` | Solo desarrollo: configuración de ejemplo, catálogo `[DEMO]` y 2 pedidos de prueba |
 
-Para aplicarlo: Supabase Dashboard → SQL Editor → pegar y ejecutar el contenido de `schema03.sql`. No toca `auth.users`.
+Las migraciones **no borran datos**. Las futuras se añadirán como archivos nuevos con marca de tiempo; nunca se editan las ya aplicadas.
 
-Después:
+### Base nueva (desarrollo)
+
+Con Supabase CLI: `supabase init` (una vez), `supabase link`, y después `supabase db reset` (aplica migraciones y seed; **borra la base de desarrollo**).
+
+Sin CLI: en el SQL Editor, ejecuta en orden cada archivo de `supabase/migrations/` y, si quieres datos de ejemplo, `supabase/seed.sql`.
+
+### Base nueva (producción)
+
+Aplica solo las migraciones (`supabase db push`), **sin** `seed.sql`. Luego configura el negocio desde `/admin/menu`.
+
+### Si tu base de desarrollo ya se creó con el antiguo `schema03.sql`
+
+No ejecutes la migración base (fallaría por objetos existentes). Opciones: recrear la base con `supabase db reset`, o marcarla como aplicada con `supabase migration repair --status applied 20261024000000` y seguir con las migraciones siguientes. El archivo antiguo se conserva en `docs/archivo/schema03.sql`.
+
+### Después de crear la base
 
 1. Crea un usuario en Authentication.
 2. Asígnale el rol administrador con `npm run make-admin -- <uuid-del-usuario>` (requiere `SUPABASE_SERVICE_ROLE_KEY` en `.env.local`, solo en tu equipo).
-3. Entra en `/admin/menu` → Configuración y define las colonias de entrega y los datos del negocio. El esquema inicia con `ordering_enabled = false`: no se aceptan pedidos hasta activarlo.
+3. Entra en `/admin/menu` → Configuración y define las colonias de entrega y los datos del negocio. La base inicia con `ordering_enabled = false`: no se aceptan pedidos hasta activarlo.
+
+### Pruebas locales del SQL
+
+`supabase/tests/` contiene un entorno mínimo que imita Supabase (roles y `auth.jwt()`) para probar las migraciones en un PostgreSQL local. Ver `supabase/tests/run_migrations.sh`.
 
 ## Tablas
 

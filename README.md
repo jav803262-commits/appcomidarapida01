@@ -32,7 +32,7 @@ Nunca pongas una clave `service_role` en una variable `NEXT_PUBLIC_*`. Solo el s
 
 ## Base de datos
 
-Por ahora el esquema completo está en `supabase/schema03.sql`. **Este archivo borra y recrea las tablas de la aplicación**: úsalo solo en una base de desarrollo. Detalles en [`docs/base-de-datos.md`](docs/base-de-datos.md).
+El esquema está en migraciones versionadas (`supabase/migrations/`) y los datos de ejemplo en `supabase/seed.sql` (solo desarrollo). Las migraciones no borran datos. Pasos y detalles en [`docs/base-de-datos.md`](docs/base-de-datos.md).
 
 ## Rutas
 

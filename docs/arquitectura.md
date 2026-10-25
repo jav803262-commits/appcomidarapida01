@@ -22,7 +22,9 @@ src/
 │   ├── ids.ts                   → generador de UUID en el cliente
 │   └── whatsapp.ts              → mensaje y enlace de WhatsApp
 └── types/index.ts               → tipos compartidos
-supabase/schema03.sql            → esquema completo (solo desarrollo)
+supabase/migrations/             → esquema versionado (Supabase CLI)
+supabase/seed.sql                → datos de demostración (solo desarrollo)
+supabase/tests/                  → entorno local para probar el SQL
 scripts/make-admin.ts            → asigna el rol admin a un usuario
 ```
 

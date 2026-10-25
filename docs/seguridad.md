@@ -21,7 +21,7 @@ Estas limitaciones **existen hoy** en el código. Están priorizadas en el plan 
 | 3 | El límite de intentos de `/api/orders/track` vive en la memoria de cada instancia y se basa en `x-forwarded-for`, que puede falsificarse. En despliegues serverless o con varias instancias es poco efectivo | Medio | Documentado; mitigado por el requisito de folio + 4 dígitos |
 | 4 | El folio se genera con `random()` (no criptográfico). No es un secreto fuerte | Bajo | Aceptado; compensado por los 4 dígitos del teléfono |
 | 5 | No hay pruebas automatizadas de RLS ni de `create_order` | Medio | Pendiente (Fase 6) |
-| 6 | `schema03.sql` borra datos; no hay migraciones para actualizar producción | Alto si se usa con ventas reales | Pendiente (Fase 3) |
+| 6 | ~~`schema03.sql` borraba datos~~ | — | **Resuelto (Fase 3):** migraciones versionadas sin `DROP`; el seed está separado |
 
 ## Transferencias
 
@@ -33,6 +33,6 @@ El folio por sí solo no es una autenticación fuerte. La consulta exige además
 
 ## Recomendaciones de despliegue
 
-- Usa un proyecto de Supabase separado para producción y no ejecutes `schema03.sql` en él.
+- Usa un proyecto de Supabase separado para producción y aplica solo las migraciones (nunca `seed.sql`).
 - Mantén `service_role` fuera de cualquier variable `NEXT_PUBLIC_*` y fuera del repositorio.
-- Antes de recibir pedidos reales, resuelve al menos las limitaciones 1, 2 y 6.
+- Antes de recibir pedidos reales, resuelve al menos las limitaciones 1 y 2.
