@@ -60,6 +60,7 @@ npm run test:sql    # pruebas del esquema SQL (requiere PostgreSQL local; ver do
 - [`docs/arquitectura.md`](docs/arquitectura.md) — estructura y flujos.
 - [`docs/base-de-datos.md`](docs/base-de-datos.md) — tablas, funciones y permisos.
 - [`docs/seguridad.md`](docs/seguridad.md) — modelo de seguridad y limitaciones conocidas.
+- [`docs/despliegue.md`](docs/despliegue.md) — pasos y lista de comprobación para producción.
 - [`docs/calidad.md`](docs/calidad.md) — pruebas, lint y deuda técnica conocida.
 - [`docs/fotos-productos.md`](docs/fotos-productos.md) — configuración del bucket de imágenes.
 - [`docs/archivo/`](docs/archivo/LEEME.md) — README antiguos (desactualizados).
