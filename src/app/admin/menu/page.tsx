@@ -2,6 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
+import { getAdminSession } from "@/lib/admin-session";
 
 type Category = { id: number; name: string; slug: string; sort_order: number; active: boolean };
 type Product = {
@@ -62,10 +63,9 @@ export default function AdminMenuPage() {
   ])) as Record<string, { enabled: boolean; open: string; close: string }>;
 
   const loadData = useCallback(async () => {
-    const { data: sessionData } = await supabaseBrowser.auth.getSession();
-    const session = sessionData.session;
-    if (!session) { setIsAdmin(false); setChecking(false); return; }
-    if (session.user.app_metadata?.role !== "admin") {
+    const admin = await getAdminSession();
+    if (admin.status === "anonymous") { setIsAdmin(false); setChecking(false); return; }
+    if (admin.status === "forbidden") {
       setError("Esta cuenta no tiene el rol de administrador.");
       setIsAdmin(false); setChecking(false); return;
     }

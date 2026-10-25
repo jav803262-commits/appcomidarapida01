@@ -3,6 +3,7 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/browser";
+import { getAdminSession } from "@/lib/admin-session";
 
 type OrderStatus =
   | "pending"
@@ -84,17 +85,16 @@ export default function AdminPage() {
   }, []);
 
   const loadOrders = useCallback(async () => {
-    const { data: sessionData } = await supabaseBrowser.auth.getSession();
-    const session = sessionData.session;
+    const admin = await getAdminSession();
 
-    if (!session) {
+    if (admin.status === "anonymous") {
       setSessionEmail("");
       setChecking(false);
       return;
     }
 
     // La metadata solo sirve para mejorar la UX. RLS es la barrera de seguridad.
-    if (session.user.app_metadata?.role !== "admin") {
+    if (admin.status === "forbidden") {
       setAuthError(
         "Esta cuenta no tiene el rol de administrador. Asigna app_metadata.role = admin en Supabase Auth."
       );
@@ -103,7 +103,7 @@ export default function AdminPage() {
       return;
     }
 
-    setSessionEmail(session.user.email ?? "Administrador");
+    setSessionEmail(admin.email);
     const { data, error } = await supabaseBrowser
       .from("orders")
       .select("*, order_items(*)")

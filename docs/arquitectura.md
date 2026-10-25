@@ -17,6 +17,7 @@ src/
 ├── lib/
 │   ├── supabase/browser.ts      → cliente para el navegador (Auth, admin)
 │   ├── supabase/server.ts       → cliente para las rutas API
+│   ├── admin-session.ts         → única definición de «sesión de administrador» en la interfaz
 │   ├── order.ts                 → cálculo de importes (solo para mostrar)
 │   ├── order-request.ts         → identificador de idempotencia (sessionStorage)
 │   ├── ids.ts                   → generador de UUID en el cliente
@@ -52,7 +53,7 @@ Estados: `pending`, `confirmed`, `preparing`, `ready`, `delivered`, `cancelled`.
 
 ## Paneles de administración
 
-El acceso requiere sesión de Supabase Auth con `app_metadata.role = "admin"`. La comprobación en la interfaz es solo de comodidad; **la seguridad real la imponen RLS y las funciones SQL** (`is_admin()`).
+El acceso requiere sesión de Supabase Auth con `app_metadata.role = "admin"`. La comprobación en la interfaz vive en un solo lugar (`src/lib/admin-session.ts`) y es solo de comodidad; **la seguridad real la imponen RLS y las funciones SQL** (`is_admin()`).
 
 | Panel | Función | Actualización |
 |---|---|---|

@@ -6,7 +6,7 @@
 |---|---|---|
 | `npm run typecheck` | Tipos TypeScript (modo estricto) | — |
 | `npm run lint` | ESLint (reglas de Next.js y TypeScript) | — |
-| `npm test` | Pruebas unitarias de `src/lib/` (Vitest, 21 pruebas) | — |
+| `npm test` | Pruebas unitarias de `src/lib/` (Vitest, 26 pruebas) | — |
 | `npm run build` | Compilación de producción | Las 2 variables `NEXT_PUBLIC_SUPABASE_*` (sirven valores ficticios) |
 | `npm run test:sql` | Esquema, reglas de negocio, permisos y concurrencia en un PostgreSQL real | PostgreSQL 16 local y ejecución como root (ver abajo) |
 
@@ -40,6 +40,6 @@ En Ubuntu/Debian: `apt install postgresql` y luego `bash supabase/tests/run_test
 
 ## Lo que todavía no está cubierto
 
-- No hay pruebas de componentes de React ni pruebas de extremo a extremo en navegador.
+- No hay pruebas de componentes de React ni pruebas de extremo a extremo en navegador. Por eso las páginas de administración de ~500 líneas (`/admin`, `/admin/menu`) **no se han dividido en componentes**: sin pruebas de interfaz, ese refactor arriesga regresiones silenciosas. Conviene hacerlo después de añadir pruebas con Playwright.
 - Las rutas `/api/*` no tienen pruebas propias; su lógica crítica está en la base (probada).
 - No hay integración continua configurada.

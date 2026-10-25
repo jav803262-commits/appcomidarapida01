@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
+import { getAdminSession } from "@/lib/admin-session";
 
 type Status = "pending" | "confirmed" | "preparing" | "ready" | "delivered" | "cancelled";
 type Item = { id: number; product_name: string; quantity: number; extras?: Array<{ name: string; price: number | string }> | null; subtotal: number | string };
@@ -18,11 +19,10 @@ export default function KitchenPage() {
   const [tab, setTab] = useState<"pending" | "preparing" | "ready">("pending");
 
   const load = useCallback(async () => {
-    const { data: sessionData } = await supabaseBrowser.auth.getSession();
-    const session = sessionData.session;
-    if (!session) { setEmail(""); setChecking(false); return; }
-    if (session.user.app_metadata?.role !== "admin") { setError("Tu cuenta no tiene permisos para acceder al panel operativo."); setChecking(false); return; }
-    setEmail(session.user.email ?? "Administrador");
+    const admin = await getAdminSession();
+    if (admin.status === "anonymous") { setEmail(""); setChecking(false); return; }
+    if (admin.status === "forbidden") { setError("Tu cuenta no tiene permisos para acceder al panel operativo."); setChecking(false); return; }
+    setEmail(admin.email);
     const { data, error: queryError } = await supabaseBrowser.from("orders").select("id,order_number,customer_name,order_type,notes,status,created_at,order_items(id,product_name,quantity,extras,subtotal)").in("status", ["pending", "confirmed", "preparing", "ready"]).order("created_at", { ascending: true }).limit(100);
     if (queryError) setError(`No se pudieron cargar los pedidos: ${queryError.message}`);
     else { setOrders((data ?? []) as Order[]); setError(""); }

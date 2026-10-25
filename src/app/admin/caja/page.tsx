@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
+import { getAdminSession } from "@/lib/admin-session";
 
 type Status = "pending" | "confirmed" | "preparing" | "ready" | "delivered" | "cancelled";
 type Method = "cash" | "transfer";
@@ -23,11 +24,10 @@ export default function CashierPage() {
   const [transferReference, setTransferReference] = useState<Record<string, string>>({});
 
   const load = useCallback(async () => {
-    const { data: sessionData } = await supabaseBrowser.auth.getSession();
-    const session = sessionData.session;
-    if (!session) { setEmail(""); setChecking(false); return; }
-    if (session.user.app_metadata?.role !== "admin") { setError("Tu cuenta no tiene permisos para acceder al panel operativo."); setChecking(false); return; }
-    setEmail(session.user.email ?? "Administrador");
+    const admin = await getAdminSession();
+    if (admin.status === "anonymous") { setEmail(""); setChecking(false); return; }
+    if (admin.status === "forbidden") { setError("Tu cuenta no tiene permisos para acceder al panel operativo."); setChecking(false); return; }
+    setEmail(admin.email);
     const [ordersResult, paymentsResult] = await Promise.all([
       supabaseBrowser.from("orders").select("id,order_number,customer_name,customer_phone,order_type,payment_method,cash_amount,subtotal,delivery_fee,total,status,created_at").in("status", ["pending", "confirmed", "preparing", "ready", "delivered"]).order("created_at", { ascending: false }).limit(100),
       supabaseBrowser.from("order_payments").select("id,order_id,amount,method,status,reference,cash_tendered,change_due,paid_at,created_at,received_by").order("paid_at", { ascending: false }).limit(300),
