@@ -11,7 +11,7 @@ Para aplicarlo: Supabase Dashboard → SQL Editor → pegar y ejecutar el conten
 Después:
 
 1. Crea un usuario en Authentication.
-2. Asígnale el rol administrador con `npx tsx scripts/make-admin.ts` (requiere `SUPABASE_SERVICE_ROLE_KEY` en `.env.local`; edita el UUID dentro del script).
+2. Asígnale el rol administrador con `npm run make-admin -- <uuid-del-usuario>` (requiere `SUPABASE_SERVICE_ROLE_KEY` en `.env.local`, solo en tu equipo).
 3. Entra en `/admin/menu` → Configuración y define las colonias de entrega y los datos del negocio. El esquema inicia con `ordering_enabled = false`: no se aceptan pedidos hasta activarlo.
 
 ## Tablas

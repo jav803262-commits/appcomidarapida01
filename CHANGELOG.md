@@ -2,11 +2,7 @@
 
 Reconstruido a partir de los README originales (archivados en `docs/archivo/`) y contrastado con el código actual. Las fechas no se conservaban en esos documentos.
 
-## Pendiente de decidir: número de versión
-
-`package.json` declara **3.1.0**, pero el código ya incluye lo descrito como «V3.2» en los README antiguos (teléfono obligatorio y seguimiento con 4 dígitos). Hay que decidir si se publica como 3.2.0.
-
-## V3.2 — presente en el código (sin reflejar en `package.json`)
+## V3.2.0
 
 - El teléfono pasa a ser **obligatorio** (10 dígitos), validado en la API y en la base de datos.
 - El seguimiento exige el folio **y** los últimos 4 dígitos del teléfono.
@@ -49,6 +45,7 @@ Reconstruido a partir de los README originales (archivados en `docs/archivo/`) y
 
 - **Fase 0:** repositorio Git con un commit de línea base.
 - **Fase 1:** documentación reconciliada con el código; README antiguos movidos a `docs/archivo/`; añadidos `docs/` y este historial.
+- **Fase 2:** limpieza. Versión fijada en **3.2.0** (el código ya incluía lo descrito como V3.2). Eliminados `src/lib/supabase.zip` y `generateOrderId()` (código muerto). `dotenv` pasa a `devDependencies`. `scripts/make-admin.ts` recibe el UUID por argumento (`npm run make-admin -- <uuid>`) y se añaden los scripts `typecheck` y `make-admin`. El mensaje de WhatsApp usa el nombre del negocio de `settings`. Se corrige `package-lock.json`, que seguía llamándose `menu-whatsapp-v2` 2.7.0.
 
 ## Pendiente (ver plan de corrección)
 

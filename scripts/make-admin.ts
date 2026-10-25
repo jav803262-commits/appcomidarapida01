@@ -6,11 +6,6 @@ dotenv.config({ path: ".env.local" });
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-console.log("Diagnóstico de variables:", {
-  supabaseUrl: supabaseUrl ? "Configurada" : "Faltante",
-  serviceRoleKey: serviceRoleKey ? "Configurada" : "Faltante",
-});
-
 if (!supabaseUrl || !serviceRoleKey) {
   throw new Error("Faltan las variables de entorno de Supabase");
 }
@@ -21,8 +16,14 @@ const supabase = createClient(supabaseUrl, serviceRoleKey, {
     persistSession: false,
   },
 });
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 async function makeAdmin() {
-  const userId = "5b7224ef-cb35-4b46-8f69-c34a33390481";
+  // Uso: npm run make-admin -- <uuid-del-usuario>
+  const userId = process.argv[2];
+  if (!userId || !UUID_RE.test(userId)) {
+    throw new Error("Indica el UUID del usuario: npm run make-admin -- <uuid>");
+  }
 
   const { data: existing, error: lookupError } =
     await supabase.auth.admin.getUserById(userId);

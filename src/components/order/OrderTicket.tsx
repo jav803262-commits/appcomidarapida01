@@ -21,7 +21,7 @@ export function OrderTicket({ order, settings, onFinish }: Props) {
 
   function sendToWhatsApp() {
     // The order is already stored in Supabase. Repeated clicks reuse this same folio.
-    window.location.href = createWhatsAppLink(settings.whatsapp, order);
+    window.location.href = createWhatsAppLink(settings.whatsapp, order, settings.name);
   }
 
   return (

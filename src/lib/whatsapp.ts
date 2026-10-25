@@ -4,9 +4,9 @@ import type { Order } from "@/types";
  * WhatsApp is only the notification channel.
  * The complete order is already persisted in Supabase before this link is opened.
  */
-export function createWhatsAppMessage(order: Order) {
+export function createWhatsAppMessage(order: Order, businessName: string) {
   return [
-    `Hola, realicé un pedido en el menú de ${"Toritos Burger"}.`,
+    `Hola, realicé un pedido en el menú de ${businessName}.`,
     "",
     `Folio: ${order.id}`,
     `Nombre: ${order.customer.name}`,
@@ -15,7 +15,7 @@ export function createWhatsAppMessage(order: Order) {
   ].join("\n");
 }
 
-export function createWhatsAppLink(phone: string, order: Order) {
-  const message = createWhatsAppMessage(order);
+export function createWhatsAppLink(phone: string, order: Order, businessName: string) {
+  const message = createWhatsAppMessage(order, businessName);
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }

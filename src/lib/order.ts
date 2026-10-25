@@ -19,10 +19,3 @@ export function calculateDeliveryFee(orderType: "pickup" | "delivery", fee: numb
 export function calculateTotal(subtotal: number, deliveryFee: number) {
   return subtotal + deliveryFee;
 }
-
-export function generateOrderId() {
-  const date = new Date();
-  const datePart = `${date.getDate()}`.padStart(2, "0") + `${date.getMonth() + 1}`.padStart(2, "0");
-  const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
-  return `${datePart}-${randomPart}`;
-}
