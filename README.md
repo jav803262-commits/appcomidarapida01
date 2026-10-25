@@ -1,61 +1,63 @@
-# Toritos Burger — V3.1
+# Toritos Burger
 
-Aplicación de menú y pedidos con Next.js, TypeScript, Tailwind CSS y Supabase.
+Aplicación web de menú y pedidos para un negocio de comida rápida a llevar. Los clientes arman su pedido y lo registran; el negocio lo gestiona desde paneles de administración, cocina y caja.
 
-## Novedades V3.1
+> **Estado:** en desarrollo. Ver [`CHANGELOG.md`](CHANGELOG.md) y la sección «Limitaciones conocidas» de [`docs/seguridad.md`](docs/seguridad.md) antes de usarlo con ventas reales.
 
-- Consulta pública del estado del pedido en `/pedido/consultar`.
-- La consulta pública requiere únicamente el folio de 6 caracteres.
-- Tabla independiente `public_order_tracking`, sin nombre, teléfono, dirección, artículos ni notas.
-- Trigger de PostgreSQL para mantener sincronizados estado y datos operativos.
-- Función SQL que devuelve una lista explícita de campos permitidos; no hay lectura pública directa de la tabla.
-- Límite básico de intentos en el endpoint de seguimiento. Es por instancia y no sustituye un limitador distribuido para una protección robusta en despliegues con varias instancias.
-- El teléfono es opcional; si se proporciona, debe tener 10 dígitos.
-- En pedidos por transferencia, el comprobante debe adjuntarse manualmente en WhatsApp después de realizar el pago. La aplicación no verifica automáticamente depósitos.
-- La pantalla de confirmación conserva el folio y evita que el carrito reaparezca hasta que el cliente elija terminar.
+## Tecnologías
 
-## Requisitos
+Next.js 16 (App Router) · React 19 · TypeScript (modo estricto) · Tailwind CSS 4 · Supabase (Postgres, Auth y Storage).
+
+## Requisitos previos
 
 - Node.js 20.9 o superior.
-- Proyecto Supabase configurado.
+- Un proyecto de Supabase **de desarrollo** (que puedas recrear sin perder datos).
 
 ## Instalación
 
 ```bash
-npm install
-cp .env.example .env.local
+npm ci
+cp .env.example .env.local     # y completa las dos variables
 npm run dev
 ```
 
-Configura en `.env.local` las variables que aparecen en `.env.example`. Nunca pongas una clave `service_role` en una variable `NEXT_PUBLIC_*`.
+Variables (ver `.env.example`):
 
-## Migraciones Supabase
+| Variable | Uso |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Clave pública (publishable/anon) |
 
-Aplica en orden las migraciones `001` a `007` que están en `supabase/migrations/`.
+Nunca pongas una clave `service_role` en una variable `NEXT_PUBLIC_*`. Solo el script `scripts/make-admin.ts` la usa, desde `.env.local` y en tu equipo.
 
-- Base nueva: aplica `001` a `007` en orden.
-- Base que ya tenía `001` a `005` y aún no aplicó el seguimiento: aplica `006` y después `007`.
-- Base donde ya se aplicó `006`: aplica únicamente `007`.
+## Base de datos
 
-La migración 006 crea la tabla de seguimiento y el trigger. La migración 007 elimina del registro público el total y la modalidad, cambia la consulta para devolver solo los campos mínimos y vuelve opcional el teléfono. Revisa primero en un entorno de pruebas y conserva una copia de seguridad antes de aplicarla en producción.
+Por ahora el esquema completo está en `supabase/schema03.sql`. **Este archivo borra y recrea las tablas de la aplicación**: úsalo solo en una base de desarrollo. Detalles en [`docs/base-de-datos.md`](docs/base-de-datos.md).
 
-## Seguridad del seguimiento
+## Rutas
 
-El folio funciona como un identificador secreto de consulta: compártelo únicamente con el cliente. La página no expone nombre, teléfono, dirección, productos, notas, modalidad ni total. El endpoint limita intentos por instancia; para despliegues públicos con tráfico real, se recomienda sustituirlo por un limitador distribuido. El folio por sí solo no equivale a una autenticación fuerte.
+| Ruta | Quién | Para qué |
+|---|---|---|
+| `/` | Público | Menú, carrito y formulario de pedido |
+| `/pedido/consultar` | Público | Estado del pedido (folio + últimos 4 dígitos del teléfono) |
+| `/admin` | Administrador | Lista de pedidos y cambio de estado |
+| `/admin/cocina` | Administrador | Tablero de preparación |
+| `/admin/caja` | Administrador | Registro de cobros y entregas |
+| `/admin/menu` | Administrador | Catálogo, configuración y fotografías |
 
+## Comprobaciones
 
-- `orders` sigue siendo la fuente privada del pedido completo.
-- `public_order_tracking` contiene solo folio, estado, fecha de registro, tiempo estimado y fecha de actualización.
-- RLS está habilitado y no se concede lectura directa a `anon` ni `authenticated`.
-- El endpoint consulta la función SQL únicamente con el folio.
-- El límite actual de intentos es una protección básica en memoria por instancia. Para producción con mayor tráfico, configurar rate limiting distribuido.
+```bash
+npx tsc --noEmit    # tipos
+npm run build       # compilación (requiere las dos variables de entorno)
+```
 
-## Transferencias
+Aún no hay pruebas automatizadas ni ESLint (previstos en el plan de corrección).
 
-El cliente ve los datos bancarios configurados por el negocio y puede copiar cada dato. Tras transferir, debe abrir WhatsApp y adjuntar el comprobante manualmente. La recepción y validación del pago sigue siendo una tarea del negocio.
+## Documentación
 
-## Fotografías de productos
-
-El panel `/admin/menu` permite seleccionar, previsualizar, reemplazar y quitar fotografías. Las imágenes se guardan en el bucket `product-images` de Supabase Storage y la URL pública se almacena en la columna existente `products.image_url`; no requiere cambios en el esquema SQL de la aplicación.
-
-Antes de usarlo, crea manualmente el bucket y configura sus permisos siguiendo `SUPABASE_STORAGE_IMAGES_SETUP.md`. El panel acepta JPG, PNG, WebP y AVIF de hasta 5 MB. La vista pública usa la fotografía y conserva el emoji como alternativa si no hay imagen o no puede cargarse.
+- [`docs/arquitectura.md`](docs/arquitectura.md) — estructura y flujos.
+- [`docs/base-de-datos.md`](docs/base-de-datos.md) — tablas, funciones y permisos.
+- [`docs/seguridad.md`](docs/seguridad.md) — modelo de seguridad y limitaciones conocidas.
+- [`docs/fotos-productos.md`](docs/fotos-productos.md) — configuración del bucket de imágenes.
+- [`docs/archivo/`](docs/archivo/LEEME.md) — README antiguos (desactualizados).
