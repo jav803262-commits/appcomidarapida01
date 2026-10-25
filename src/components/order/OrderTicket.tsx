@@ -56,14 +56,14 @@ export function OrderTicket({ order, settings, onFinish }: Props) {
         </div>
       </section>
 
-      {order.customer.paymentMethod === "transfer" && (
+      {order.customer.paymentMethod === "transfer" && order.transfer && (
         <section className="mt-5 rounded-3xl border border-amber-200 bg-amber-50 p-5">
           <h2 className="text-lg font-black text-amber-950">Datos para tu transferencia</h2>
           <p className="mt-1 text-sm leading-5 text-amber-900">Realiza la transferencia por el importe indicado y comparte el comprobante con el negocio por un medio de contacto disponible para que pueda revisarlo.</p>
           <div className="mt-4 space-y-3 rounded-2xl bg-white p-4 text-sm ring-1 ring-amber-200">
-            <TransferDatum label="Banco" value={settings.transfer.bank} onCopy={copyText} />
-            <TransferDatum label="Beneficiario" value={settings.transfer.holder} onCopy={copyText} />
-            <TransferDatum label="Cuenta / CLABE" value={settings.transfer.account} onCopy={copyText} />
+            <TransferDatum label="Banco" value={order.transfer.bank} onCopy={copyText} />
+            <TransferDatum label="Beneficiario" value={order.transfer.holder} onCopy={copyText} />
+            <TransferDatum label="Cuenta / CLABE" value={order.transfer.account} onCopy={copyText} />
             <div className="border-t border-zinc-200 pt-3">
               <p className="text-zinc-500">Importe</p>
               <p className="mt-1 text-2xl font-black">${order.total.toFixed(2)} MXN</p>

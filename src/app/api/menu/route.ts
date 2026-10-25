@@ -32,7 +32,12 @@ export async function GET() {
   try {
     const [settingsResult, categoriesResult, productsResult, extrasResult] =
       await Promise.all([
-        supabaseServer.from("settings").select("*").limit(1).maybeSingle(),
+        supabaseServer
+          .from("settings")
+          // Columnas explícitas: nunca select("*") sobre datos de negocio.
+          .select("business_name,description,phone,whatsapp,address,currency,ordering_enabled,delivery_enabled,pickup_enabled,delivery_fee,min_order_amount,cash_enabled,transfer_enabled,delivery_eta_minutes,pickup_eta_minutes,business_hours_enabled,business_timezone,schedule,delivery_neighborhoods")
+          .limit(1)
+          .maybeSingle(),
         supabaseServer
           .from("categories")
           .select("id,name,slug,sort_order")
@@ -134,12 +139,9 @@ if (error) {
         deliveryNeighborhoods: Array.isArray(settings.delivery_neighborhoods) ? settings.delivery_neighborhoods : [],
         paymentMethods: {
           cash: Boolean(settings.cash_enabled ?? true),
-          transfer: Boolean(settings.transfer_enabled ?? Boolean(settings.transfer_account)) && Boolean(settings.transfer_account),
-        },
-        transfer: {
-          bank: settings.transfer_bank ?? "",
-          holder: settings.transfer_holder ?? "",
-          account: settings.transfer_account ?? "",
+          // La base garantiza que transfer_enabled solo es true si hay cuenta configurada.
+          // Los datos bancarios NO se publican aquí: llegan en la respuesta de /api/orders.
+          transfer: Boolean(settings.transfer_enabled),
         },
       },
       categories: (categoriesResult.data ?? []).map((category) => ({

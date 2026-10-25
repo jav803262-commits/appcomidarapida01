@@ -47,7 +47,8 @@ Reconstruido a partir de los README originales (archivados en `docs/archivo/`) y
 - **Fase 1:** documentación reconciliada con el código; README antiguos movidos a `docs/archivo/`; añadidos `docs/` y este historial.
 - **Fase 2:** limpieza. Versión fijada en **3.2.0** (el código ya incluía lo descrito como V3.2). Eliminados `src/lib/supabase.zip` y `generateOrderId()` (código muerto). `dotenv` pasa a `devDependencies`. `scripts/make-admin.ts` recibe el UUID por argumento (`npm run make-admin -- <uuid>`) y se añaden los scripts `typecheck` y `make-admin`. El mensaje de WhatsApp usa el nombre del negocio de `settings`. Se corrige `package-lock.json`, que seguía llamándose `menu-whatsapp-v2` 2.7.0.
 - **Fase 3:** `schema03.sql` (destructivo) se divide en `supabase/migrations/20261024000000_baseline.sql` (sin `DROP`) y `supabase/seed.sql` (solo desarrollo); el original pasa a `docs/archivo/`. Se verificó en un PostgreSQL 16 local que el resultado tiene estructura y permisos idénticos al esquema anterior. Se añade `supabase/tests/` para probar el SQL.
+- **Fase 4:** los datos bancarios salen de `settings` (legible por cualquiera) y pasan a `transfer_details`, solo admin. `/api/menu` ya no usa `select("*")` ni publica banco/cuenta; `create_order` los devuelve únicamente en pedidos por transferencia. Triggers que mantienen la coherencia (no activar sin cuenta; no borrar la cuenta si está activa). Migración `20261024010000`; los datos existentes se copian, no se pierden. Pruebas SQL con roles `anon`, usuario normal y admin.
 
 ## Pendiente (ver plan de corrección)
 
-Datos bancarios públicos (Fase 4), protección anti-abuso (Fase 5), ESLint y pruebas (Fase 6), refactor y actualización automática de caja (Fase 7).
+Protección anti-abuso (Fase 5), ESLint y pruebas (Fase 6), refactor y actualización automática de caja (Fase 7).

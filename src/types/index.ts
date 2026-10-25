@@ -44,7 +44,13 @@ export interface BusinessSettings {
   pickupEnabled: boolean;
   deliveryNeighborhoods: string[];
   paymentMethods: { cash: boolean; transfer: boolean };
-  transfer: { bank: string; holder: string; account: string };
+}
+
+/** Datos bancarios: solo se reciben al registrar un pedido por transferencia. */
+export interface TransferDetails {
+  bank: string;
+  holder: string;
+  account: string;
 }
 
 export interface CatalogData {
@@ -88,4 +94,6 @@ export interface Order {
   total: number;
   createdAt: string;
   status?: string;
+  /** Presente solo en pedidos por transferencia. */
+  transfer?: TransferDetails;
 }

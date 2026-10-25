@@ -16,7 +16,7 @@ Estas limitaciones **existen hoy** en el código. Están priorizadas en el plan 
 
 | # | Limitación | Riesgo | Estado |
 |---|---|---|---|
-| 1 | `settings` es legible por `anon` y `/api/menu` usa `select("*")`: **banco, titular y cuenta de transferencia se envían a cualquier visitante**, no solo después de registrar un pedido | Medio-alto | Pendiente (Fase 4) |
+| 1 | ~~Banco, titular y cuenta eran públicos~~ | — | **Resuelto (Fase 4):** viven en `transfer_details` (solo admin) y se entregan únicamente en la respuesta de `create_order` de un pedido por transferencia |
 | 2 | No hay límite de frecuencia al crear pedidos. `create_order` es ejecutable por `anon`, de modo que también puede llamarse directamente a la API de Supabase sin pasar por `/api/orders` | Alto (pedidos falsos que saturen la cocina) | Pendiente (Fase 5) |
 | 3 | El límite de intentos de `/api/orders/track` vive en la memoria de cada instancia y se basa en `x-forwarded-for`, que puede falsificarse. En despliegues serverless o con varias instancias es poco efectivo | Medio | Documentado; mitigado por el requisito de folio + 4 dígitos |
 | 4 | El folio se genera con `random()` (no criptográfico). No es un secreto fuerte | Bajo | Aceptado; compensado por los 4 dígitos del teléfono |
@@ -25,7 +25,7 @@ Estas limitaciones **existen hoy** en el código. Están priorizadas en el plan 
 
 ## Transferencias
 
-El cliente ve los datos bancarios y puede copiarlos. Debe adjuntar el comprobante manualmente por WhatsApp. En caja, el administrador debe verificar en su banco que el dinero llegó antes de registrar la transferencia; la aplicación no consulta el banco.
+Los datos bancarios **no** forman parte del catálogo público: se guardan en una tabla privada (`transfer_details`) y el cliente los recibe solo tras registrar un pedido por transferencia (también al reintentar la misma solicitud). Después puede copiarlos. Debe adjuntar el comprobante manualmente por WhatsApp. En caja, el administrador debe verificar en su banco que el dinero llegó antes de registrar la transferencia; la aplicación no consulta el banco.
 
 ## Seguimiento del pedido
 
@@ -35,4 +35,4 @@ El folio por sí solo no es una autenticación fuerte. La consulta exige además
 
 - Usa un proyecto de Supabase separado para producción y aplica solo las migraciones (nunca `seed.sql`).
 - Mantén `service_role` fuera de cualquier variable `NEXT_PUBLIC_*` y fuera del repositorio.
-- Antes de recibir pedidos reales, resuelve al menos las limitaciones 1 y 2.
+- Antes de recibir pedidos reales, resuelve al menos la limitación 2.

@@ -33,13 +33,14 @@ No ejecutes la migración base (fallaría por objetos existentes). Opciones: rec
 
 ### Pruebas locales del SQL
 
-`supabase/tests/` contiene un entorno mínimo que imita Supabase (roles y `auth.jwt()`) para probar las migraciones en un PostgreSQL local. Ver `supabase/tests/run_migrations.sh`.
+`supabase/tests/` contiene un entorno mínimo que imita Supabase (roles y `auth.jwt()`) para probar las migraciones en un PostgreSQL local. `supabase/tests/run_tests.sh` recrea la base, aplica migraciones y seed y ejecuta los archivos de `supabase/tests/sql/` (requiere PostgreSQL 16 local y permisos de root).
 
 ## Tablas
 
 | Tabla | Contenido | Notas |
 |---|---|---|
-| `settings` | Configuración del negocio | Una sola fila (índice único). Incluye horario, cobertura (`delivery_neighborhoods`), costos, tiempos estimados y datos de transferencia |
+| `settings` | Configuración pública del negocio | Una sola fila (índice único). Horario, cobertura (`delivery_neighborhoods`), costos, tiempos estimados e interruptor `transfer_enabled` |
+| `transfer_details` | Banco, titular y cuenta/CLABE | **Privada** (solo admin). Una sola fila. Un trigger impide activar la transferencia sin cuenta y borrar la cuenta mientras esté activa |
 | `categories` | Categorías del menú | `slug` único, `active` |
 | `products` | Productos | `price`, `image_url`, `emoji`, `available` |
 | `product_extras` | Extras por producto | Se eliminan con el producto |
@@ -52,13 +53,13 @@ No ejecutes la migración base (fallaría por objetos existentes). Opciones: rec
 
 | Función | Quién puede ejecutarla | Qué hace |
 |---|---|---|
-| `create_order(jsonb)` | `anon`, `authenticated` | Valida y crea el pedido de forma transaccional: negocio abierto, modalidad y pago habilitados, teléfono, cobertura, mínimo, disponibilidad, cantidades (1–50), extras y precios leídos de la base. Genera el folio y aplica idempotencia |
+| `create_order(jsonb)` | `anon`, `authenticated` | Valida y crea el pedido de forma transaccional: negocio abierto, modalidad y pago habilitados, teléfono, cobertura, mínimo, disponibilidad, cantidades (1–50), extras y precios leídos de la base. Genera el folio, aplica idempotencia y, si el pago es transferencia, devuelve los datos bancarios |
 | `get_public_order_status(folio, últimos4)` | `anon`, `authenticated` | Devuelve solo folio, estado, fechas y minutos estimados |
 | `transition_order_status(id, estado)` | Solo admin | Aplica la máquina de estados; exige pago activo para `delivered` |
 | `record_order_payment(...)` | Solo admin | Registra el cobro de un pedido `ready` |
 | `is_admin()` | `authenticated` | `app_metadata.role = 'admin'` |
 
-Funciones internas (sin permisos para clientes): `business_is_open`, `validate_delivery_neighborhood`, `sync_public_order_tracking`, `set_updated_at`.
+Funciones internas (sin permisos para clientes): `order_transfer_details`, `enforce_transfer_enabled_has_account`, `enforce_account_while_transfer_enabled`, `business_is_open`, `validate_delivery_neighborhood`, `sync_public_order_tracking`, `set_updated_at`.
 
 ## Folio
 
@@ -67,8 +68,6 @@ Funciones internas (sin permisos para clientes): `business_is_open`, `validate_d
 ## Permisos (RLS y grants)
 
 - RLS está activo en las 8 tablas, y se revocan todos los privilegios a `anon`, `authenticated` y `public` antes de conceder lo necesario.
-- Lectura pública (`anon`): `settings`, categorías activas, productos y extras disponibles.
-- Administrador (`authenticated` + `is_admin()`): gestiona categorías, productos y extras; actualiza `settings`; **lee** pedidos, líneas y pagos.
+- Lectura pública (`anon`): `settings` (sin datos bancarios), categorías activas, productos y extras disponibles.
+- Administrador (`authenticated` + `is_admin()`): gestiona categorías, productos y extras; actualiza `settings` y `transfer_details`; **lee** pedidos, líneas y pagos.
 - Nadie puede escribir directamente en `orders`, `order_items` ni `order_payments`: solo las funciones anteriores.
-
-> ⚠️ Consecuencia de la lectura pública de `settings`: los datos de transferencia (`transfer_bank`, `transfer_holder`, `transfer_account`) son legibles por cualquiera. Ver `docs/seguridad.md`.

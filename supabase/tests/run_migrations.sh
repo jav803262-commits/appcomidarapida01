@@ -4,6 +4,8 @@
 set -euo pipefail
 DB="${1:?indica el nombre de la base}"; SEED="${2:-}"
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
+# Arranca el clúster local si no está en marcha.
+su postgres -c "pg_isready -q" 2>/dev/null || { pg_ctlcluster 16 main start; sleep 3; }
 PSQL="psql -q -v ON_ERROR_STOP=1 -d $DB"
 su postgres -c "dropdb --if-exists $DB" 2>/dev/null; su postgres -c "createdb $DB"
 su postgres -c "$PSQL -f $HERE/tests/00_supabase_stub.sql"

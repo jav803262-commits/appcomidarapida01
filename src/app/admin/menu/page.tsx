@@ -10,11 +10,11 @@ type Product = {
   available: boolean; sort_order: number;
 };
 type Extra = { id: number; product_id: number; name: string; price: number | string; available: boolean; sort_order: number };
+type TransferInfo = { id: number; bank: string | null; holder: string | null; account: string | null };
 type Settings = {
   id: number; business_name: string; description: string | null; phone: string | null;
   whatsapp: string | null; address: string | null; currency: string; ordering_enabled: boolean;
-  delivery_enabled: boolean; delivery_fee: number | string; transfer_bank: string | null;
-  transfer_holder: string | null; transfer_account: string | null;
+  delivery_enabled: boolean; delivery_fee: number | string;
   pickup_enabled: boolean; cash_enabled: boolean; transfer_enabled: boolean;
   min_order_amount: number | string; delivery_eta_minutes: number; pickup_eta_minutes: number;
   business_hours_enabled: boolean; business_timezone: string; delivery_neighborhoods: string[];
@@ -38,6 +38,7 @@ export default function AdminMenuPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [extras, setExtras] = useState<Extra[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
+  const [transfer, setTransfer] = useState<TransferInfo | null>(null);
   const [productForm, setProductForm] = useState(emptyProduct);
   const [editingProductId, setEditingProductId] = useState<number | null>(null);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -68,13 +69,14 @@ export default function AdminMenuPage() {
       setIsAdmin(false); setChecking(false); return;
     }
 
-    const [cat, prod, ext, cfg] = await Promise.all([
+    const [cat, prod, ext, cfg, trf] = await Promise.all([
       supabaseBrowser.from("categories").select("*").order("sort_order"),
       supabaseBrowser.from("products").select("*").order("sort_order"),
       supabaseBrowser.from("product_extras").select("*").order("sort_order"),
       supabaseBrowser.from("settings").select("*").limit(1).maybeSingle(),
+      supabaseBrowser.from("transfer_details").select("*").limit(1).maybeSingle(),
     ]);
-    const firstError = cat.error || prod.error || ext.error || cfg.error;
+    const firstError = cat.error || prod.error || ext.error || cfg.error || trf.error;
     if (firstError) {
       setError(`No se pudo cargar el menú: ${firstError.message}`);
       setChecking(false); return;
@@ -83,6 +85,7 @@ export default function AdminMenuPage() {
     setProducts((prod.data ?? []) as Product[]);
     setExtras((ext.data ?? []) as Extra[]);
     setSettings((cfg.data ?? null) as Settings | null);
+    setTransfer((trf.data ?? null) as TransferInfo | null);
     setIsAdmin(true);
     setError(""); setChecking(false);
   }, []);
@@ -298,9 +301,6 @@ export default function AdminMenuPage() {
       delivery_enabled: settings.delivery_enabled,
       delivery_fee: Number(settings.delivery_fee),
       delivery_neighborhoods: (settings.delivery_neighborhoods ?? []).map((item) => item.trim()).filter(Boolean).filter((item, index, list) => list.findIndex((value) => value.toLocaleLowerCase("es-MX") === item.toLocaleLowerCase("es-MX")) === index),
-      transfer_bank: settings.transfer_bank?.trim() || null,
-      transfer_holder: settings.transfer_holder?.trim() || null,
-      transfer_account: settings.transfer_account?.trim() || null,
       pickup_enabled: settings.pickup_enabled,
       cash_enabled: settings.cash_enabled,
       transfer_enabled: settings.transfer_enabled,
@@ -318,7 +318,27 @@ export default function AdminMenuPage() {
       setError("Revisa el nombre, las tarifas, el mínimo de compra y los tiempos estimados.");
       setSaving(false); return;
     }
-    const { error: saveError } = await supabaseBrowser.from("settings").update(payload).eq("id", settings.id);
+    const transferPayload = {
+      bank: transfer?.bank?.trim() || null,
+      holder: transfer?.holder?.trim() || null,
+      account: transfer?.account?.trim() || null,
+    };
+    if (payload.transfer_enabled && !transferPayload.account) {
+      setError("Para aceptar transferencias, captura la cuenta o CLABE.");
+      setSaving(false); return;
+    }
+    // La base impide activar la transferencia sin cuenta y borrar la cuenta con la transferencia activa,
+    // así que el orden importa: al activar se guarda primero la cuenta; al desactivar, primero el interruptor.
+    async function saveSettings() {
+      return supabaseBrowser.from("settings").update(payload).eq("id", settings!.id);
+    }
+    async function saveTransfer() {
+      if (!transfer) return { error: null };
+      return supabaseBrowser.from("transfer_details").update(transferPayload).eq("id", transfer.id);
+    }
+    const first = payload.transfer_enabled ? await saveTransfer() : await saveSettings();
+    const second = first.error ? first : payload.transfer_enabled ? await saveSettings() : await saveTransfer();
+    const saveError = second.error;
     setSaving(false);
     if (saveError) { setError(`No se pudo guardar la configuración: ${saveError.message}`); return; }
     setMessage("Configuración del negocio actualizada."); await loadData();
@@ -450,9 +470,9 @@ export default function AdminMenuPage() {
             <h3 className="admin-settings-section-title">Métodos de pago</h3>
             <label className="admin-check"><input type="checkbox" checked={settings.cash_enabled ?? true} onChange={e=>setSettings({...settings,cash_enabled:e.target.checked})}/> Aceptar efectivo</label>
             <label className="admin-check"><input type="checkbox" checked={settings.transfer_enabled ?? true} onChange={e=>setSettings({...settings,transfer_enabled:e.target.checked})}/> Aceptar transferencia</label>
-            <label>Banco para transferencia<input className="field" value={settings.transfer_bank ?? ""} onChange={e=>setSettings({...settings,transfer_bank:e.target.value})}/></label>
-            <label>Titular de la cuenta<input className="field" value={settings.transfer_holder ?? ""} onChange={e=>setSettings({...settings,transfer_holder:e.target.value})}/></label>
-            <label>Cuenta o CLABE<input className="field" value={settings.transfer_account ?? ""} onChange={e=>setSettings({...settings,transfer_account:e.target.value})}/></label>
+            <label>Banco para transferencia<input className="field" value={transfer?.bank ?? ""} onChange={e=>setTransfer(transfer && {...transfer,bank:e.target.value})}/></label>
+            <label>Titular de la cuenta<input className="field" value={transfer?.holder ?? ""} onChange={e=>setTransfer(transfer && {...transfer,holder:e.target.value})}/></label>
+            <label>Cuenta o CLABE<input className="field" value={transfer?.account ?? ""} onChange={e=>setTransfer(transfer && {...transfer,account:e.target.value})}/></label>
 
             <h3 className="admin-settings-section-title">Horario del negocio</h3>
             <label className="admin-check"><input type="checkbox" checked={settings.business_hours_enabled ?? false} onChange={e=>setSettings({...settings,business_hours_enabled:e.target.checked,schedule:currentSchedule})}/> Restringir pedidos al horario configurado</label>

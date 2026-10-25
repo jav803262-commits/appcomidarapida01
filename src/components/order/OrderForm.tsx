@@ -156,6 +156,14 @@ export function OrderForm({ settings, onBack, onComplete }: Props) {
         total: Number(data.total),
         createdAt: data.createdAt,
         status: data.status,
+        transfer:
+          paymentMethod === "transfer" && data.transfer
+            ? {
+                bank: String(data.transfer.bank ?? ""),
+                holder: String(data.transfer.holder ?? ""),
+                account: String(data.transfer.account ?? ""),
+              }
+            : undefined,
       };
 
       clearPendingOrderRequest();

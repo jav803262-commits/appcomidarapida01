@@ -20,9 +20,6 @@ insert into public.settings (
   min_order_amount,
   cash_enabled,
   transfer_enabled,
-  transfer_bank,
-  transfer_holder,
-  transfer_account,
   delivery_eta_minutes,
   pickup_eta_minutes,
   business_hours_enabled,
@@ -43,9 +40,6 @@ insert into public.settings (
   0,
   true,
   false,
-  'BANCO_DE_PRUEBA_NO_REAL',
-  'TITULAR_DE_PRUEBA_NO_REAL',
-  'CUENTA_DE_PRUEBA_NO_REAL',
   45,
   20,
   false,
@@ -61,6 +55,11 @@ insert into public.settings (
   }'::jsonb,
   '[]'::jsonb
 );
+
+update public.transfer_details
+set bank = 'BANCO_DE_PRUEBA_NO_REAL',
+    holder = 'TITULAR_DE_PRUEBA_NO_REAL',
+    account = 'CUENTA_DE_PRUEBA_NO_REAL';
 
 -- Catálogo de ejemplo para la interfaz. Precios y nombres son de prueba.
 insert into public.categories (name, slug, sort_order, active) values
