@@ -58,7 +58,7 @@ El acceso requiere sesión de Supabase Auth con `app_metadata.role = "admin"`. L
 |---|---|---|
 | `/admin` | Lista de pedidos y cambio de estado (`transition_order_status`) | Cada 15 s |
 | `/admin/cocina` | Pestañas pendientes / preparando / listos. Avanza `pending`/`confirmed` → `preparing` → `ready` | Cada 12 s |
-| `/admin/caja` | Registra el cobro (`record_order_payment`) y marca como entregado | **Manual** (no se refresca sola) |
+| `/admin/caja` | Registra el cobro (`record_order_payment`) y marca como entregado | Cada 15 s |
 | `/admin/menu` | CRUD de categorías, productos, extras y configuración; subida de fotos | — |
 
 Reglas relevantes de caja:
