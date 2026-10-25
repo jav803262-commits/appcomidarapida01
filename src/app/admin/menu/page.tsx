@@ -17,6 +17,7 @@ type Settings = {
   delivery_enabled: boolean; delivery_fee: number | string;
   pickup_enabled: boolean; cash_enabled: boolean; transfer_enabled: boolean;
   min_order_amount: number | string; delivery_eta_minutes: number; pickup_eta_minutes: number;
+  max_active_orders_per_phone: number | string; max_pending_orders: number | string;
   business_hours_enabled: boolean; business_timezone: string; delivery_neighborhoods: string[];
   schedule: Record<string, { enabled: boolean; open: string; close: string }>;
 };
@@ -305,6 +306,8 @@ export default function AdminMenuPage() {
       cash_enabled: settings.cash_enabled,
       transfer_enabled: settings.transfer_enabled,
       min_order_amount: Number(settings.min_order_amount),
+      max_active_orders_per_phone: Number(settings.max_active_orders_per_phone ?? 3),
+      max_pending_orders: Number(settings.max_pending_orders ?? 30),
       delivery_eta_minutes: Number(settings.delivery_eta_minutes),
       pickup_eta_minutes: Number(settings.pickup_eta_minutes),
       business_hours_enabled: settings.business_hours_enabled,
@@ -313,6 +316,8 @@ export default function AdminMenuPage() {
     };
     if (!payload.business_name || !Number.isFinite(payload.delivery_fee) || payload.delivery_fee < 0 ||
         !Number.isFinite(payload.min_order_amount) || payload.min_order_amount < 0 ||
+        !Number.isInteger(payload.max_active_orders_per_phone) || payload.max_active_orders_per_phone < 1 || payload.max_active_orders_per_phone > 20 ||
+        !Number.isInteger(payload.max_pending_orders) || payload.max_pending_orders < 1 || payload.max_pending_orders > 500 ||
         !Number.isInteger(payload.delivery_eta_minutes) || payload.delivery_eta_minutes < 1 || payload.delivery_eta_minutes > 240 ||
         !Number.isInteger(payload.pickup_eta_minutes) || payload.pickup_eta_minutes < 1 || payload.pickup_eta_minutes > 240) {
       setError("Revisa el nombre, las tarifas, el mínimo de compra y los tiempos estimados.");
@@ -461,6 +466,8 @@ export default function AdminMenuPage() {
             <p className="admin-muted">Estas colonias aparecerán como opciones en el formulario. Si no configuras ninguna, los pedidos a domicilio quedarán deshabilitados.</p>
             <label>Tarifa de envío (MXN)<input className="field" type="number" min="0" step="0.01" value={String(settings.delivery_fee)} onChange={e=>setSettings({...settings,delivery_fee:e.target.value})} required/></label>
             <label>Pedido mínimo (MXN)<input className="field" type="number" min="0" step="0.01" value={String(settings.min_order_amount ?? 0)} onChange={e=>setSettings({...settings,min_order_amount:e.target.value})} required/></label>
+            <label>Pedidos en proceso por teléfono (1–20)<input className="field" type="number" min="1" max="20" step="1" value={String(settings.max_active_orders_per_phone ?? 3)} onChange={e=>setSettings({...settings,max_active_orders_per_phone:e.target.value})} required/></label>
+            <label>Máximo de pedidos pendientes sin atender (1–500)<input className="field" type="number" min="1" max="500" step="1" value={String(settings.max_pending_orders ?? 30)} onChange={e=>setSettings({...settings,max_pending_orders:e.target.value})} required/></label>
             <label>Tiempo estimado a domicilio (minutos)<input className="field" type="number" min="1" max="240" step="1" value={String(settings.delivery_eta_minutes ?? 45)} onChange={e=>setSettings({...settings,delivery_eta_minutes:Number(e.target.value)})} required/></label>
             <label>Tiempo estimado para recoger (minutos)<input className="field" type="number" min="1" max="240" step="1" value={String(settings.pickup_eta_minutes ?? 20)} onChange={e=>setSettings({...settings,pickup_eta_minutes:Number(e.target.value)})} required/></label>
             <label className="admin-check"><input type="checkbox" checked={settings.ordering_enabled} onChange={e=>setSettings({...settings,ordering_enabled:e.target.checked})}/> Aceptar pedidos</label>

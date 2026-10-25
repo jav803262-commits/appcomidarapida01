@@ -85,10 +85,13 @@ export async function POST(request: Request) {
     });
 
     if (error) {
+      // PT429: límite anti-abuso de create_order (ver migración order_abuse_protection).
       const status =
         error.code === "P0001"
           ? 409
-          : 500;
+          : error.code === "PT429"
+            ? 429
+            : 500;
 
       return NextResponse.json(
         {

@@ -39,7 +39,7 @@ Las dos claves de Supabase usadas son la **publishable** (pública). No existe u
 1. `/api/menu` devuelve configuración, categorías y productos disponibles. `orderingEnabled` ya incluye la comprobación de horario.
 2. El carrito se guarda en `localStorage` (clave `food-menu-cart`), con un máximo de 50 unidades por línea.
 3. En `OrderForm` el cliente captura nombre, **teléfono (obligatorio, 10 dígitos)**, modalidad (recoger o domicilio), colonia (si es domicilio, elegida de la lista de cobertura), método de pago (efectivo o transferencia) y notas.
-4. Se envía `POST /api/orders` con un `clientRequestId` (UUID). Si la solicitud se repite con los mismos datos, la base devuelve el mismo pedido (`duplicate: true`) en lugar de crear otro.
+4. Se envía `POST /api/orders` con un `clientRequestId` (UUID). Si se superan los límites anti-abuso, la API responde **429** con un mensaje para el cliente. Si la solicitud se repite con los mismos datos, la base devuelve el mismo pedido (`duplicate: true`) en lugar de crear otro.
 5. El pedido registrado muestra el **folio** de 6 caracteres. En pedidos por transferencia, la respuesta de la API incluye también los datos bancarios, que no forman parte del catálogo público. El carrito se vacía y el comprobante se guarda en `sessionStorage` (`food-menu-active-order`) para sobrevivir a una recarga. El botón «Terminar» lo elimina.
 6. El botón de WhatsApp abre un mensaje con **solo el folio y el nombre**; el detalle del pedido no se envía por ese canal.
 7. En transferencias, el cliente debe adjuntar el comprobante manualmente por WhatsApp. La aplicación **no verifica depósitos**.

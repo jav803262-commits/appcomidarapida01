@@ -33,13 +33,13 @@ No ejecutes la migración base (fallaría por objetos existentes). Opciones: rec
 
 ### Pruebas locales del SQL
 
-`supabase/tests/` contiene un entorno mínimo que imita Supabase (roles y `auth.jwt()`) para probar las migraciones en un PostgreSQL local. `supabase/tests/run_tests.sh` recrea la base, aplica migraciones y seed y ejecuta los archivos de `supabase/tests/sql/` (requiere PostgreSQL 16 local y permisos de root).
+`supabase/tests/` contiene un entorno mínimo que imita Supabase (roles y `auth.jwt()`) para probar las migraciones en un PostgreSQL local. `supabase/tests/run_tests.sh` recrea la base, aplica migraciones y seed y ejecuta los archivos de `supabase/tests/sql/` y una prueba de concurrencia con sesiones simultáneas (requiere PostgreSQL 16 local y permisos de root).
 
 ## Tablas
 
 | Tabla | Contenido | Notas |
 |---|---|---|
-| `settings` | Configuración pública del negocio | Una sola fila (índice único). Horario, cobertura (`delivery_neighborhoods`), costos, tiempos estimados e interruptor `transfer_enabled` |
+| `settings` | Configuración pública del negocio | Una sola fila (índice único). Horario, cobertura (`delivery_neighborhoods`), costos, tiempos estimados, interruptor `transfer_enabled` y límites anti-abuso (`max_active_orders_per_phone`, `max_pending_orders`) |
 | `transfer_details` | Banco, titular y cuenta/CLABE | **Privada** (solo admin). Una sola fila. Un trigger impide activar la transferencia sin cuenta y borrar la cuenta mientras esté activa |
 | `categories` | Categorías del menú | `slug` único, `active` |
 | `products` | Productos | `price`, `image_url`, `emoji`, `available` |
@@ -53,7 +53,7 @@ No ejecutes la migración base (fallaría por objetos existentes). Opciones: rec
 
 | Función | Quién puede ejecutarla | Qué hace |
 |---|---|---|
-| `create_order(jsonb)` | `anon`, `authenticated` | Valida y crea el pedido de forma transaccional: negocio abierto, modalidad y pago habilitados, teléfono, cobertura, mínimo, disponibilidad, cantidades (1–50), extras y precios leídos de la base. Genera el folio, aplica idempotencia y, si el pago es transferencia, devuelve los datos bancarios |
+| `create_order(jsonb)` | `anon`, `authenticated` | Valida y crea el pedido de forma transaccional: negocio abierto, modalidad y pago habilitados, teléfono, cobertura, mínimo, disponibilidad, cantidades (1–50), extras y precios leídos de la base. Aplica los límites anti-abuso (error `PT429`), genera el folio, aplica idempotencia y, si el pago es transferencia, devuelve los datos bancarios |
 | `get_public_order_status(folio, últimos4)` | `anon`, `authenticated` | Devuelve solo folio, estado, fechas y minutos estimados |
 | `transition_order_status(id, estado)` | Solo admin | Aplica la máquina de estados; exige pago activo para `delivered` |
 | `record_order_payment(...)` | Solo admin | Registra el cobro de un pedido `ready` |

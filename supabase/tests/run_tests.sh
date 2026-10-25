@@ -10,4 +10,5 @@ for f in "$HERE"/sql/*.sql; do
   case "$(basename "$f")" in 00_*) continue;; esac
   if echo "$out" | grep -q -E "ERROR|FALLO"; then echo "FALLO  $(basename "$f")"; echo "$out" | grep -E "ERROR|FALLO|CONTEXT" | head -6; fail=1; else echo "$out"; fi
 done
+"$HERE/concurrency.sh" 2>&1 || fail=1
 exit $fail

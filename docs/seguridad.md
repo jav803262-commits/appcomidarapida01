@@ -17,7 +17,7 @@ Estas limitaciones **existen hoy** en el código. Están priorizadas en el plan 
 | # | Limitación | Riesgo | Estado |
 |---|---|---|---|
 | 1 | ~~Banco, titular y cuenta eran públicos~~ | — | **Resuelto (Fase 4):** viven en `transfer_details` (solo admin) y se entregan únicamente en la respuesta de `create_order` de un pedido por transferencia |
-| 2 | No hay límite de frecuencia al crear pedidos. `create_order` es ejecutable por `anon`, de modo que también puede llamarse directamente a la API de Supabase sin pasar por `/api/orders` | Alto (pedidos falsos que saturen la cocina) | Pendiente (Fase 5) |
+| 2 | **Mitigado (Fase 5):** `create_order` limita los pedidos en proceso por teléfono (3 por defecto) y los pendientes sin atender de todo el negocio (30 por defecto), también cuando se invoca directamente con la clave pública. **Riesgo residual:** un atacante con muchos teléfonos distintos puede llegar al tope global y bloquear temporalmente a clientes reales (la cocina queda protegida, pero hay denegación de servicio parcial). No hay captcha | Medio | Mitigado; captcha opcional en el futuro |
 | 3 | El límite de intentos de `/api/orders/track` vive en la memoria de cada instancia y se basa en `x-forwarded-for`, que puede falsificarse. En despliegues serverless o con varias instancias es poco efectivo | Medio | Documentado; mitigado por el requisito de folio + 4 dígitos |
 | 4 | El folio se genera con `random()` (no criptográfico). No es un secreto fuerte | Bajo | Aceptado; compensado por los 4 dígitos del teléfono |
 | 5 | No hay pruebas automatizadas de RLS ni de `create_order` | Medio | Pendiente (Fase 6) |
@@ -35,4 +35,4 @@ El folio por sí solo no es una autenticación fuerte. La consulta exige además
 
 - Usa un proyecto de Supabase separado para producción y aplica solo las migraciones (nunca `seed.sql`).
 - Mantén `service_role` fuera de cualquier variable `NEXT_PUBLIC_*` y fuera del repositorio.
-- Antes de recibir pedidos reales, resuelve al menos la limitación 2.
+- Antes de recibir pedidos reales, revisa el riesgo residual de la limitación 2 y ajusta los límites a tu volumen real.
