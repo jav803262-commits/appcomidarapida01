@@ -53,7 +53,8 @@ Reconstruido a partir de los README originales (archivados en `docs/archivo/`) y
 - **Corrección de documentación:** `docs/arquitectura.md` afirmaba que caja no se refrescaba sola; era un error de la revisión inicial. Caja consulta cada 15 s (el temporizador estaba en una línea muy larga). No hay nada que corregir en el código.
 - **Fase 7 (parcial):** la regla «¿esta sesión es de administrador?» estaba repetida en 4 páginas; ahora vive en `src/lib/admin-session.ts` (con pruebas, incluida la que garantiza que `user_metadata`, editable por el usuario, no concede el rol). Cambio sin alteración de comportamiento. No se dividieron las páginas grandes (ver `docs/calidad.md`).
 - **Fase 8:** nueva guía `docs/despliegue.md` (con lista de comprobación y verificaciones con `curl` por ejecutar). `.gitignore` ahora cubre cualquier `.env*` salvo `.env.example` (antes no cubría p. ej. `.env.production`). `.env.example` documenta `SUPABASE_SERVICE_ROLE_KEY` como variable solo local. Se declara `engines.node >= 20.9.0`.
+- **Pruebas de interfaz:** 25 pruebas nuevas (51 en total) de `OrderTicket`, `OrderForm` y `CartProvider` con Testing Library y jsdom. Dos cambios de testabilidad sin alterar el comportamiento: `src/lib/navigation.ts` (navegación del ticket) y `src/lib/settings-save.ts` (orden de guardado de configuración y datos bancarios, ahora con pruebas). Un intento previo de edición de `admin/menu` duplicó código por un error mío al localizar el texto; se detectó con `tsc`, se restauró desde Git y se rehízo.
 
 ## Pendiente (ver plan de corrección)
 
-División de las páginas admin en componentes (tras añadir pruebas de interfaz), reducción de las advertencias de ESLint, integración continua.
+Pruebas en navegador real (Playwright), división de las páginas admin en componentes (tras añadir pruebas de interfaz para ellas), reducción de las advertencias de ESLint, integración continua.

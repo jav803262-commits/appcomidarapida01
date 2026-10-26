@@ -1,4 +1,4 @@
-import type { CartItem, Order, Product, ProductExtra } from "@/types";
+import type { BusinessSettings, CartItem, Order, Product, ProductExtra } from "@/types";
 
 export function makeExtra(id: string, price: number): ProductExtra {
   return { id, name: `Extra ${id}`, price, available: true };
@@ -23,4 +23,15 @@ export function makeOrder(overrides: Partial<Order> = {}): Order {
     subtotal: 89, deliveryFee: 0, total: 89, createdAt: "2026-10-24T12:00:00Z",
     ...overrides,
   } as Order;
+}
+
+export function makeSettings(overrides: Partial<BusinessSettings> = {}): BusinessSettings {
+  return {
+    name: "Toritos Burger", description: "", phone: "5511112222", whatsapp: "+52 55 1234 5678",
+    address: "", currency: "MXN", orderingEnabled: true, businessOpen: true,
+    businessHoursEnabled: false, schedule: {}, businessTimezone: "America/Mexico_City",
+    deliveryEnabled: false, deliveryFee: 30, minOrderAmount: 0, deliveryEtaMinutes: 40, pickupEtaMinutes: 20,
+    pickupEnabled: true, deliveryNeighborhoods: [], paymentMethods: { cash: true, transfer: true },
+    ...overrides,
+  };
 }

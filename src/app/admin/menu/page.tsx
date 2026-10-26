@@ -3,6 +3,7 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { getAdminSession } from "@/lib/admin-session";
+import { saveSettingsAndTransfer } from "@/lib/settings-save";
 
 type Category = { id: number; name: string; slug: string; sort_order: number; active: boolean };
 type Product = {
@@ -332,18 +333,14 @@ export default function AdminMenuPage() {
       setError("Para aceptar transferencias, captura la cuenta o CLABE.");
       setSaving(false); return;
     }
-    // La base impide activar la transferencia sin cuenta y borrar la cuenta con la transferencia activa,
-    // así que el orden importa: al activar se guarda primero la cuenta; al desactivar, primero el interruptor.
-    async function saveSettings() {
-      return supabaseBrowser.from("settings").update(payload).eq("id", settings!.id);
-    }
-    async function saveTransfer() {
-      if (!transfer) return { error: null };
-      return supabaseBrowser.from("transfer_details").update(transferPayload).eq("id", transfer.id);
-    }
-    const first = payload.transfer_enabled ? await saveTransfer() : await saveSettings();
-    const second = first.error ? first : payload.transfer_enabled ? await saveSettings() : await saveTransfer();
-    const saveError = second.error;
+    // El orden de guardado lo resuelve saveSettingsAndTransfer (ver su documentación).
+    const saveError = await saveSettingsAndTransfer({
+      transferEnabled: payload.transfer_enabled,
+      saveSettings: () => supabaseBrowser.from("settings").update(payload).eq("id", settings.id),
+      saveTransfer: () => transfer
+        ? supabaseBrowser.from("transfer_details").update(transferPayload).eq("id", transfer.id)
+        : Promise.resolve({ error: null }),
+    });
     setSaving(false);
     if (saveError) { setError(`No se pudo guardar la configuración: ${saveError.message}`); return; }
     setMessage("Configuración del negocio actualizada."); await loadData();

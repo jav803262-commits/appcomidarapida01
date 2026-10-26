@@ -6,7 +6,7 @@
 |---|---|---|
 | `npm run typecheck` | Tipos TypeScript (modo estricto) | — |
 | `npm run lint` | ESLint (reglas de Next.js y TypeScript) | — |
-| `npm test` | Pruebas unitarias de `src/lib/` (Vitest, 26 pruebas) | — |
+| `npm test` | Pruebas unitarias de `src/lib/` y de componentes React en jsdom (Vitest, 51 pruebas) | — |
 | `npm run build` | Compilación de producción | Las 2 variables `NEXT_PUBLIC_SUPABASE_*` (sirven valores ficticios) |
 | `npm run test:sql` | Esquema, reglas de negocio, permisos y concurrencia en un PostgreSQL real | PostgreSQL 16 local y ejecución como root (ver abajo) |
 
@@ -28,18 +28,32 @@ Se comprobó con **pruebas de mutación** que no son decorativas: al conceder a 
 
 En Ubuntu/Debian: `apt install postgresql` y luego `bash supabase/tests/run_tests.sh` (los scripts usan `su postgres`).
 
+## Pruebas de componentes (`tests/components/`)
+
+Se ejecutan con Vitest + Testing Library en **jsdom** (un DOM simulado, no un navegador real) y con `fetch` simulado:
+
+| Archivo | Qué demuestra |
+|---|---|
+| `OrderTicket.test.tsx` | Muestra los datos bancarios solo en pedidos por transferencia y solo los que llegaron con el pedido; no falla con comprobantes antiguos; el enlace de WhatsApp usa el número limpio y el nombre del negocio |
+| `OrderForm.test.tsx` | Entrega al ticket los datos bancarios de la API; el cliente no envía precios ni totales (solo IDs y cantidades); muestra el mensaje del servidor ante un 429; teléfono e importe en efectivo inválidos no se envían; pedidos pausados no se envían |
+| `CartContext.test.tsx` | Agrupación de líneas, tope de 50, persistencia en `localStorage`, recuperación ante datos corruptos |
+
+Se comprobó con una mutación que detectan fallos: al romper a propósito el traspaso de `transfer` en el formulario, la prueba correspondiente falla.
+
+Además, `tests/unit/settings-save.test.ts` fija el orden de guardado de configuración y datos bancarios que exigen los triggers de la base.
+
 ## Estado de ESLint
 
-0 errores y 11 advertencias, todas conocidas:
+0 errores y 12 advertencias, todas conocidas:
 
 | Advertencia | Dónde | Por qué se deja | Plan |
 |---|---|---|---|
-| `react-hooks/set-state-in-effect` (7) | Carrito, `MenuApp`, `ProductCard`, consulta de pedido, cocina, caja | Es el patrón de hidratar estado desde `localStorage`/`sessionStorage` o cargar datos en un efecto. Funciona y evita errores de hidratación en SSR; la regla es nueva y propone otra técnica | Fase 7: hooks de datos y `useSyncExternalStore` |
+| `react-hooks/set-state-in-effect` (8) | Carrito, `MenuApp`, `ProductCard`, consulta de pedido, cocina, caja | Es el patrón de hidratar estado desde `localStorage`/`sessionStorage` o cargar datos en un efecto. Funciona y evita errores de hidratación en SSR; la regla es nueva y propone otra técnica | Fase 7: hooks de datos y `useSyncExternalStore` |
 | `no-img-element` (3) | Imágenes de productos | Las URL vienen de Supabase Storage y habría que configurar `remotePatterns` de `next/image` | Opcional |
-| `no-location-assign-relative-destination` (2) | Cerrar sesión admin, enlace de WhatsApp | La regla confunde una URL externa (`wa.me`) y una recarga intencional con navegación interna | Opcional |
+| `no-location-assign-relative-destination` (1) | Cerrar sesión admin | Recarga intencional a una ruta propia | Opcional |
 
 ## Lo que todavía no está cubierto
 
-- No hay pruebas de componentes de React ni pruebas de extremo a extremo en navegador. Por eso las páginas de administración de ~500 líneas (`/admin`, `/admin/menu`) **no se han dividido en componentes**: sin pruebas de interfaz, ese refactor arriesga regresiones silenciosas. Conviene hacerlo después de añadir pruebas con Playwright.
+- **No hay pruebas de extremo a extremo en un navegador real.** Las pruebas de componentes usan jsdom, que no ejecuta CSS ni reproduce diferencias entre navegadores. Al intentar usar Playwright en el entorno de revisión no fue posible descargar un navegador, así que sigue pendiente. Por eso las páginas de administración de ~500 líneas (`/admin`, `/admin/menu`) **no se han dividido en componentes**: sin pruebas de interfaz, ese refactor arriesga regresiones silenciosas. Las páginas de administración tampoco tienen pruebas de componentes. Conviene dividirlas después de añadir pruebas de interfaz para ellas (Playwright o Testing Library).
 - Las rutas `/api/*` no tienen pruebas propias; su lógica crítica está en la base (probada).
 - No hay integración continua configurada.

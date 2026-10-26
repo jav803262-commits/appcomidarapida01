@@ -2,6 +2,7 @@
 
 import type { BusinessSettings, Order } from "@/types";
 import { createWhatsAppLink } from "@/lib/whatsapp";
+import { navigateTo } from "@/lib/navigation";
 
 interface Props {
   order: Order;
@@ -21,7 +22,7 @@ export function OrderTicket({ order, settings, onFinish }: Props) {
 
   function sendToWhatsApp() {
     // The order is already stored in Supabase. Repeated clicks reuse this same folio.
-    window.location.href = createWhatsAppLink(settings.whatsapp, order, settings.name);
+    navigateTo(createWhatsAppLink(settings.whatsapp, order, settings.name));
   }
 
   return (
@@ -94,7 +95,7 @@ export function OrderTicket({ order, settings, onFinish }: Props) {
 
         <button
           type="button"
-          onClick={() => { window.location.href = `/pedido/consultar?folio=${encodeURIComponent(order.id)}`; }}
+          onClick={() => navigateTo(`/pedido/consultar?folio=${encodeURIComponent(order.id)}`)}
           className="w-full rounded-2xl border border-zinc-300 bg-white px-5 py-4 font-bold text-zinc-900 transition hover:bg-zinc-50"
         >
           Consultar estado de mi pedido
