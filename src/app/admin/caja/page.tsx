@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { getAdminSession } from "@/lib/admin-session";
+import { useBusinessName } from "@/lib/use-business-name";
+import { businessInitials } from "@/lib/business-name";
 
 type Status = "pending" | "confirmed" | "preparing" | "ready" | "delivered" | "cancelled";
 type Method = "cash" | "transfer";
@@ -14,6 +16,7 @@ const label: Record<Status, string> = { pending: "Pendiente", confirmed: "Confir
 export default function CashierPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
+  const businessName = useBusinessName();
   const [checking, setChecking] = useState(true);
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
@@ -88,7 +91,7 @@ export default function CashierPage() {
 
   if (checking) return <main className="ops-shell"><p>Comprobando sesión…</p></main>;
   if (!email) return <main className="ops-shell"><section className="ops-login"><a href="/admin">← Volver al panel</a><h1>💳 Caja · Cobros y entregas</h1><p>{error || "Inicia sesión con tu cuenta de administrador para acceder."}</p><a className="ops-primary" href="/admin">Ir a iniciar sesión</a></section></main>;
-  return <main className="ops-shell ops-cashier"><header className="ops-header"><a className="ops-brand" href="/admin"><span className="ops-logo">TB</span><span><strong>Toritos Burger</strong><small>Panel de caja</small></span></a><nav className="ops-nav"><a href="/admin/cocina">🍳 Cocina</a><a className="active" href="/admin/caja">💳 Caja</a><a href="/admin">📋 Centro de pedidos</a></nav><div className="ops-user"><span>{email}</span><button onClick={() => void supabaseBrowser.auth.signOut()}>Salir</button></div></header>
+  return <main className="ops-shell ops-cashier"><header className="ops-header"><a className="ops-brand" href="/admin"><span className="ops-logo">{businessInitials(businessName)}</span><span><strong>{businessName}</strong><small>Panel de caja</small></span></a><nav className="ops-nav"><a href="/admin/cocina">🍳 Cocina</a><a className="active" href="/admin/caja">💳 Caja</a><a href="/admin">📋 Centro de pedidos</a></nav><div className="ops-user"><span>{email}</span><button onClick={() => void supabaseBrowser.auth.signOut()}>Salir</button></div></header>
     <section className="ops-content"><div className="ops-title-row"><div><p className="ops-eyebrow">COBROS Y ENTREGA</p><h1>💳 Caja · Cobros y entregas</h1><p>Registra el dinero recibido, verifica transferencias y confirma la entrega solo cuando el pago esté registrado.</p></div><button className="ops-secondary" onClick={() => { setChecking(true); void load(); }}>↻ Actualizar pedidos</button></div>{error && <p className="ops-alert" role="alert">{error}</p>}
       <div className="ops-cashier-summary"><div><span>📦 Pedidos listos para entregar</span><strong>{orders.filter(o => o.status === "ready").length}</strong></div><div><span>✅ Pedidos con pago registrado</span><strong>{activePaymentByOrder.size}</strong><small>Solo pagos registrados en order_payments.</small></div></div>
       <div className="ops-filter-row"><div><h2>🧾 Cola de caja</h2><p>El método elegido no confirma que el dinero se haya recibido.</p></div><select value={filter} onChange={e => setFilter(e.target.value as "ready" | "all")}><option value="ready">Listos para entregar</option><option value="all">Todos los pedidos activos y entregados</option></select></div>

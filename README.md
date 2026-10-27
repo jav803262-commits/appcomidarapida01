@@ -1,6 +1,6 @@
-# Toritos Burger
+# Plantilla de pedidos para comida rápida
 
-Aplicación web de menú y pedidos para un negocio de comida rápida a llevar. Los clientes arman su pedido y lo registran; el negocio lo gestiona desde paneles de administración, cocina y caja.
+Aplicación web de menú y pedidos para negocios de comida rápida a llevar. Los clientes arman su pedido y lo registran; el negocio lo gestiona desde paneles de administración, cocina y caja. Es una **plantilla**: el nombre, los datos de contacto, el menú, la cobertura y los pagos del negocio se configuran desde `/admin/menu`, sin tocar el código (ver [`docs/personalizacion.md`](docs/personalizacion.md)).
 
 > **Estado:** en desarrollo. Ver [`CHANGELOG.md`](CHANGELOG.md) y la sección «Limitaciones conocidas» de [`docs/seguridad.md`](docs/seguridad.md) antes de usarlo con ventas reales.
 
@@ -60,6 +60,7 @@ npm run test:sql    # pruebas del esquema SQL (requiere PostgreSQL local; ver do
 - [`docs/arquitectura.md`](docs/arquitectura.md) — estructura y flujos.
 - [`docs/base-de-datos.md`](docs/base-de-datos.md) — tablas, funciones y permisos.
 - [`docs/seguridad.md`](docs/seguridad.md) — modelo de seguridad y limitaciones conocidas.
+- [`docs/personalizacion.md`](docs/personalizacion.md) — adaptar la plantilla a un negocio (y sus límites).
 - [`docs/despliegue.md`](docs/despliegue.md) — pasos y lista de comprobación para producción.
 - [`docs/calidad.md`](docs/calidad.md) — pruebas, lint y deuda técnica conocida.
 - [`docs/fotos-productos.md`](docs/fotos-productos.md) — configuración del bucket de imágenes.

@@ -22,7 +22,7 @@ create or replace function t.open_business() returns void language sql as $$
       cash_enabled = true, transfer_enabled = true, business_hours_enabled = false,
       min_order_amount = 0; $$;
 
-create or replace function t.product_id(p_name text default 'Hamburguesa clásica [DEMO]')
+create or replace function t.product_id(p_name text default 'Platillo clásico [DEMO]')
 returns bigint language sql as $$ select id from public.products where name = p_name $$;
 
 -- Payload válido de recoger en local.

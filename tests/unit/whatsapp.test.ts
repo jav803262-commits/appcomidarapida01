@@ -4,14 +4,14 @@ import { makeOrder } from "./fixtures";
 
 describe("mensaje de WhatsApp", () => {
   it("incluye negocio, folio y nombre", () => {
-    const msg = createWhatsAppMessage(makeOrder(), "Toritos Burger");
-    expect(msg).toContain("Toritos Burger");
+    const msg = createWhatsAppMessage(makeOrder(), "Negocio de Prueba");
+    expect(msg).toContain("Negocio de Prueba");
     expect(msg).toContain("Folio: ABC234");
     expect(msg).toContain("Nombre: Ana Pérez");
   });
 
   it("NO incluye el detalle del pedido, importes ni teléfono", () => {
-    const msg = createWhatsAppMessage(makeOrder({ total: 456 }), "Toritos Burger");
+    const msg = createWhatsAppMessage(makeOrder({ total: 456 }), "Negocio de Prueba");
     expect(msg).not.toContain("456");
     expect(msg).not.toContain("5512345678");
   });
@@ -23,7 +23,7 @@ describe("mensaje de WhatsApp", () => {
 
 describe("enlace de WhatsApp", () => {
   it("codifica el texto en la URL", () => {
-    const url = createWhatsAppLink("5215512345678", makeOrder(), "Toritos Burger");
+    const url = createWhatsAppLink("5215512345678", makeOrder(), "Negocio de Prueba");
     expect(url.startsWith("https://wa.me/5215512345678?text=")).toBe(true);
     expect(url).not.toContain(" ");
     expect(decodeURIComponent(url.split("?text=")[1])).toContain("Folio: ABC234");

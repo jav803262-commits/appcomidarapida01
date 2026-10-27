@@ -2,7 +2,7 @@
 # Verifica que el bloqueo por teléfono funciona con solicitudes SIMULTÁNEAS reales (varias sesiones).
 # Sin el advisory lock, varias sesiones leerían "0 pedidos" a la vez y todas insertarían.
 set -uo pipefail
-DB=toritos_tests; N=8; LIMIT=2; PHONE=5544444444
+DB=pedidos_tests; N=8; LIMIT=2; PHONE=5544444444
 q() { su postgres -c "psql -qAt -d $DB -c \"$1\""; }
 q "select t.open_business()" >/dev/null
 q "update public.settings set max_active_orders_per_phone=$LIMIT, max_pending_orders=500" >/dev/null

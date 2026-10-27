@@ -187,7 +187,7 @@ export function OrderForm({ settings, onBack, onComplete }: Props) {
       </button>
 
       <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-zinc-200 sm:p-7">
-      <p className="text-xs font-black uppercase tracking-[0.18em] text-red-600">Toritos Burger</p>
+      <p className="text-xs font-black uppercase tracking-[0.18em] text-red-600">{settings.name}</p>
       <h1 className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">Confirma tu pedido</h1>
       <p className="mt-2 text-sm text-zinc-500">
         Revisa tus datos y realiza tu pedido. Al registrarlo, recibirás un folio para consultarlo después; WhatsApp es opcional.

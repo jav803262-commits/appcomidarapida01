@@ -27,6 +27,10 @@ function MenuAppContent() {
   const { clearCart } = useCart();
 
   useEffect(() => {
+    if (catalog) document.title = `${catalog.settings.name} | Menú`;
+  }, [catalog]);
+
+  useEffect(() => {
     try {
       const savedOrder = sessionStorage.getItem("food-menu-active-order");
       if (savedOrder) {

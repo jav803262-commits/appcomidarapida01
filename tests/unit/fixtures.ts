@@ -7,7 +7,7 @@ export function makeExtra(id: string, price: number): ProductExtra {
 export function makeProduct(id: string, price: number): Product {
   return {
     id, name: `Producto ${id}`, description: "", price, emoji: "🍔",
-    category: "hamburguesas", available: true, extras: [],
+    category: "principales", available: true, extras: [],
   } as Product;
 }
 
@@ -27,7 +27,7 @@ export function makeOrder(overrides: Partial<Order> = {}): Order {
 
 export function makeSettings(overrides: Partial<BusinessSettings> = {}): BusinessSettings {
   return {
-    name: "Toritos Burger", description: "", phone: "5511112222", whatsapp: "+52 55 1234 5678",
+    name: "Negocio de Prueba", description: "", phone: "5511112222", whatsapp: "+52 55 1234 5678",
     address: "", currency: "MXN", orderingEnabled: true, businessOpen: true,
     businessHoursEnabled: false, schedule: {}, businessTimezone: "America/Mexico_City",
     deliveryEnabled: false, deliveryFee: 30, minOrderAmount: 0, deliveryEtaMinutes: 40, pickupEtaMinutes: 20,

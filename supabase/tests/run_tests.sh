@@ -2,7 +2,7 @@
 # Recrea la base local (stub + migraciones + seed) y ejecuta todas las pruebas de supabase/tests/sql.
 # Uso: supabase/tests/run_tests.sh      (requiere PostgreSQL local y ejecutarse como root)
 set -uo pipefail
-HERE="$(cd "$(dirname "$0")" && pwd)"; DB=toritos_tests
+HERE="$(cd "$(dirname "$0")" && pwd)"; DB=pedidos_tests
 "$HERE/run_migrations.sh" "$DB" --seed >/dev/null || { echo "Fallo al aplicar migraciones"; exit 1; }
 fail=0
 for f in "$HERE"/sql/*.sql; do

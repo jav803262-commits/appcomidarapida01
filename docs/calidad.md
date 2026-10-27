@@ -6,7 +6,7 @@
 |---|---|---|
 | `npm run typecheck` | Tipos TypeScript (modo estricto) | — |
 | `npm run lint` | ESLint (reglas de Next.js y TypeScript) | — |
-| `npm test` | Pruebas unitarias de `src/lib/` y de componentes React en jsdom (Vitest, 51 pruebas) | — |
+| `npm test` | Pruebas unitarias de `src/lib/` y de componentes React en jsdom (Vitest, 63 pruebas) | — |
 | `npm run build` | Compilación de producción | Las 2 variables `NEXT_PUBLIC_SUPABASE_*` (sirven valores ficticios) |
 | `npm run test:sql` | Esquema, reglas de negocio, permisos y concurrencia en un PostgreSQL real | PostgreSQL 16 local y ejecución como root (ver abajo) |
 
@@ -35,7 +35,8 @@ Se ejecutan con Vitest + Testing Library en **jsdom** (un DOM simulado, no un na
 | Archivo | Qué demuestra |
 |---|---|
 | `OrderTicket.test.tsx` | Muestra los datos bancarios solo en pedidos por transferencia y solo los que llegaron con el pedido; no falla con comprobantes antiguos; el enlace de WhatsApp usa el número limpio y el nombre del negocio |
-| `OrderForm.test.tsx` | Entrega al ticket los datos bancarios de la API; el cliente no envía precios ni totales (solo IDs y cantidades); muestra el mensaje del servidor ante un 429; teléfono e importe en efectivo inválidos no se envían; pedidos pausados no se envían |
+| `OrderForm.test.tsx` | Muestra el nombre del negocio configurado (no uno fijo); entrega al ticket los datos bancarios de la API; el cliente no envía precios ni totales (solo IDs y cantidades); muestra el mensaje del servidor ante un 429; teléfono e importe en efectivo inválidos no se envían; pedidos pausados no se envían |
+| `useBusinessName.test.tsx` | El nombre del negocio de las cabeceras admin viene de la configuración, con respaldo si falta o está vacío |
 | `CartContext.test.tsx` | Agrupación de líneas, tope de 50, persistencia en `localStorage`, recuperación ante datos corruptos |
 
 Se comprobó con una mutación que detectan fallos: al romper a propósito el traspaso de `transfer` en el formulario, la prueba correspondiente falla.

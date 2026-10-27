@@ -3,6 +3,8 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { getAdminSession } from "@/lib/admin-session";
+import { useBusinessName } from "@/lib/use-business-name";
+import { businessInitials } from "@/lib/business-name";
 import { saveSettingsAndTransfer } from "@/lib/settings-save";
 
 type Category = { id: number; name: string; slug: string; sort_order: number; active: boolean };
@@ -42,6 +44,8 @@ export default function AdminMenuPage() {
   const [extras, setExtras] = useState<Extra[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [transfer, setTransfer] = useState<TransferInfo | null>(null);
+  const fetchedName = useBusinessName();
+  const businessName = settings?.business_name?.trim() || fetchedName;
   const [productForm, setProductForm] = useState(emptyProduct);
   const [editingProductId, setEditingProductId] = useState<number | null>(null);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -351,7 +355,7 @@ export default function AdminMenuPage() {
     <main className="admin-shell admin-login-wrap">
       <section className="admin-login">
         <a className="admin-back" href="/admin">← Volver al panel de pedidos</a>
-        <div className="admin-brand-mark">TB</div><p className="admin-eyebrow">TORITOS BURGER</p>
+        <div className="admin-brand-mark">{businessInitials(businessName)}</div><p className="admin-eyebrow">{businessName.toUpperCase()}</p>
         <h1>Administrar menú</h1>
         <p className="admin-muted">Inicia sesión con una cuenta administradora.</p>
         {error && <p className="admin-error" role="alert">{error}</p>}
@@ -364,8 +368,8 @@ export default function AdminMenuPage() {
     <main className="admin-shell">
       <header className="admin-topbar">
         <a className="admin-topbrand" href="/admin">
-          <span className="admin-brand-mark small">TB</span>
-          <span><strong>Toritos Burger</strong><small>Administración del menú</small></span>
+          <span className="admin-brand-mark small">{businessInitials(businessName)}</span>
+          <span><strong>{businessName}</strong><small>Administración del menú</small></span>
         </a>
         <div className="admin-account">
           <a className="admin-quiet-button" href="/admin">Pedidos</a>

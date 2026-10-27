@@ -4,6 +4,8 @@ import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { getAdminSession } from "@/lib/admin-session";
+import { useBusinessName } from "@/lib/use-business-name";
+import { businessInitials } from "@/lib/business-name";
 
 type OrderStatus =
   | "pending"
@@ -70,6 +72,7 @@ export default function AdminPage() {
   const [authError, setAuthError] = useState("");
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState<OrderRow[]>([]);
+  const businessName = useBusinessName();
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | OrderStatus>("all");
   const [notice, setNotice] = useState("");
@@ -181,15 +184,15 @@ export default function AdminPage() {
     const total = money(order.total);
     switch (type) {
       case "ready":
-        return `¡Hola, ${order.customer_name}! Tu pedido ${folio} está listo${order.order_type === "pickup" ? " para recoger en nuestro local" : ""}. Total: ${total}. ¡Gracias por elegir Toritos Burger!`;
+        return `¡Hola, ${order.customer_name}! Tu pedido ${folio} está listo${order.order_type === "pickup" ? " para recoger en nuestro local" : ""}. Total: ${total}. ¡Gracias por elegir ${businessName}!`;
       case "cancelled":
-        return `Hola, ${order.customer_name}. Te informamos que tu pedido ${folio} fue cancelado. Si tienes dudas, por favor comunícate con Toritos Burger.`;
+        return `Hola, ${order.customer_name}. Te informamos que tu pedido ${folio} fue cancelado. Si tienes dudas, por favor comunícate con ${businessName}.`;
       case "delay":
         return `Hola, ${order.customer_name}. Tu pedido ${folio} está tardando un poco más de lo previsto. Te avisaremos en cuanto tengamos una actualización. Gracias por tu paciencia.`;
       case "question":
-        return `Hola, ${order.customer_name}. Necesitamos aclarar un detalle de tu pedido ${folio}. ¿Podrías comunicarte con Toritos Burger, por favor?`;
+        return `Hola, ${order.customer_name}. Necesitamos aclarar un detalle de tu pedido ${folio}. ¿Podrías comunicarte con ${businessName}, por favor?`;
       default:
-        return `¡Hola, ${order.customer_name}! Recibimos tu pedido ${folio} por ${total}. Te avisaremos cuando esté listo. ¡Gracias por elegir Toritos Burger!`;
+        return `¡Hola, ${order.customer_name}! Recibimos tu pedido ${folio} por ${total}. Te avisaremos cuando esté listo. ¡Gracias por elegir ${businessName}!`;
     }
   };
 
@@ -260,8 +263,8 @@ export default function AdminPage() {
       <main className="admin-shell admin-login-wrap">
         <section className="admin-login">
           <Link className="admin-back" href="/">← Volver al menú</Link>
-          <div className="admin-brand-mark">TB</div>
-          <p className="admin-eyebrow">TORITOS BURGER</p>
+          <div className="admin-brand-mark">{businessInitials(businessName)}</div>
+          <p className="admin-eyebrow">{businessName.toUpperCase()}</p>
           <h1>Panel de pedidos</h1>
           <p className="admin-muted">Acceso exclusivo para el administrador del negocio.</p>
           <form className="admin-form" onSubmit={handleLogin}>
@@ -309,8 +312,8 @@ export default function AdminPage() {
     <main className="admin-shell">
       <header className="admin-topbar">
         <a className="admin-topbrand" href="/admin">
-          <span className="admin-brand-mark small">TB</span>
-          <span><strong>Toritos Burger</strong><small>Panel administrativo</small></span>
+          <span className="admin-brand-mark small">{businessInitials(businessName)}</span>
+          <span><strong>{businessName}</strong><small>Panel administrativo</small></span>
         </a>
         <div className="admin-account">
           <nav className="admin-nav-links" aria-label="Áreas de trabajo">

@@ -67,6 +67,14 @@ describe("OrderForm · pedido por transferencia", () => {
   });
 });
 
+describe("OrderForm · marca", () => {
+  it("muestra el nombre del negocio configurado, no uno fijo en el código", async () => {
+    mockFetch({ ok: true, body: serverReply });
+    await renderForm(makeSettings({ name: "Tacos El Güero" }));
+    expect(screen.getByText("Tacos El Güero")).toBeInTheDocument();
+  });
+});
+
 describe("OrderForm · errores", () => {
   it("muestra el mensaje del servidor cuando se supera el límite anti-abuso (429)", async () => {
     mockFetch({ ok: false, status: 429, body: { message: "Ya tienes pedidos en proceso con este teléfono." } });

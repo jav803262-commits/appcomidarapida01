@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { getAdminSession } from "@/lib/admin-session";
+import { useBusinessName } from "@/lib/use-business-name";
+import { businessInitials } from "@/lib/business-name";
 
 type Status = "pending" | "confirmed" | "preparing" | "ready" | "delivered" | "cancelled";
 type Item = { id: number; product_name: string; quantity: number; extras?: Array<{ name: string; price: number | string }> | null; subtotal: number | string };
@@ -12,6 +14,7 @@ const elapsed = (date: string) => { const minutes = Math.max(0, Math.floor((Date
 
 export default function KitchenPage() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const businessName = useBusinessName();
   const [checking, setChecking] = useState(true);
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
@@ -56,7 +59,7 @@ export default function KitchenPage() {
   if (!email) return <main className="ops-shell"><section className="ops-login"><a href="/admin">← Volver al panel</a><h1>Panel de cocina</h1><p>{error || "Inicia sesión con tu cuenta de administrador para acceder."}</p><a className="ops-primary" href="/admin">Ir a iniciar sesión</a></section></main>;
   const counts = { pending: orders.filter(o => ["pending", "confirmed"].includes(o.status)).length, preparing: orders.filter(o => o.status === "preparing").length, ready: orders.filter(o => o.status === "ready").length };
   return <main className="ops-shell ops-kitchen">
-    <header className="ops-header"><a className="ops-brand" href="/admin"><span className="ops-logo">TB</span><span><strong>Toritos Burger</strong><small>Panel de cocina</small></span></a><nav className="ops-nav"><a className="active" href="/admin/cocina">🍳 Cocina</a><a href="/admin/caja">💳 Caja</a><a href="/admin">📋 Centro de pedidos</a></nav><div className="ops-user"><span>{email}</span><button onClick={() => void supabaseBrowser.auth.signOut()}>Salir</button></div></header>
+    <header className="ops-header"><a className="ops-brand" href="/admin"><span className="ops-logo">{businessInitials(businessName)}</span><span><strong>{businessName}</strong><small>Panel de cocina</small></span></a><nav className="ops-nav"><a className="active" href="/admin/cocina">🍳 Cocina</a><a href="/admin/caja">💳 Caja</a><a href="/admin">📋 Centro de pedidos</a></nav><div className="ops-user"><span>{email}</span><button onClick={() => void supabaseBrowser.auth.signOut()}>Salir</button></div></header>
     <section className="ops-content"><div className="ops-title-row"><div><p className="ops-eyebrow">OPERACIÓN EN TIEMPO REAL</p><h1>🍳 Cocina · Preparación de pedidos</h1><p>Prioriza los pedidos más antiguos. Abre cada tarjeta, revisa los productos y avanza su preparación. Actualización automática cada 12 segundos.</p></div><button className="ops-secondary" onClick={() => { setChecking(true); void load(); }}>↻ Actualizar pedidos</button></div>
       {error && <p className="ops-alert" role="alert">{error}</p>}
       <div className="ops-metrics"><button className={tab === "pending" ? "selected" : ""} onClick={() => setTab("pending")}><span>🧾</span><small>Pendientes</small><strong>{counts.pending}</strong></button><button className={tab === "preparing" ? "selected" : ""} onClick={() => setTab("preparing")}><span>🔥</span><small>Preparando</small><strong>{counts.preparing}</strong></button><button className={tab === "ready" ? "selected" : ""} onClick={() => setTab("ready")}><span>✅</span><small>Listos</small><strong>{counts.ready}</strong></button></div>
